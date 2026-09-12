@@ -313,12 +313,15 @@
 
   async function persist(){
     try{
-      if(cloudReady && dbRef) await dbRef.set(reported);
-      else localStorage.setItem(STORAGE_KEY, JSON.stringify(reported));
+      if(cloudReady && dbRef){
+        await dbRef.set(JSON.parse(JSON.stringify(reported)));
+      }else{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reported));
+      }
       return true;
     }catch(e){
-      console.error(e);
-      showToast("บันทึกไม่สำเร็จ · ตรวจ Firebase");
+      console.error("DPSCUP persist error:", e);
+      showToast("บันทึกไม่สำเร็จ: " + (e?.message || "ตรวจ Firebase"));
       return false;
     }
   }
@@ -403,9 +406,13 @@
   }
 
   function panelHtml(m){
-    const rep = reported[m.id] || {mode:"goals", goals:[]};
-    const isManual = rep.mode === "manual";
+    const rep = reported[m.id] || {mode:"manual", scoreA:0, scoreB:0};
+    const isManual = rep.mode !== "goals";
     const goals = rep.goals || [];
+    const current = isManual
+      ? {a:Number(rep.scoreA ?? 0), b:Number(rep.scoreB ?? 0)}
+      : scoreFromGoals(goals);
+
     const rows = goals.map((g,i)=>{
       const run = scoreFromGoals(goals.slice(0,i+1));
       const label = g.scorer ? g.scorer + (g.og ? " (OG)" : "") : (g.og ? "เข้าประตูตัวเอง" : "ไม่ระบุชื่อ");
@@ -413,39 +420,41 @@
         <button class="rm" data-rmgoal="${m.id}" data-idx="${i}">✕</button></div>`;
     }).join("");
 
-    return `<div class="panel ${isManual ? '' : ''}" id="panel-${m.id}">
-        <div style="display:${isManual?'none':'block'}" id="goalsMode-${m.id}">
-          <div class="goal-add">
-            <span class="team-lbl">${escapeHtml(m.a)}</span>
-            <input type="text" id="scorerA-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
-            <label class="og"><input type="checkbox" id="ogA-${m.id}"> OG</label>
-            <button class="add" data-addgoal="${m.id}" data-team="a">+ ประตู</button>
-          </div>
-          <div class="goal-add">
-            <span class="team-lbl">${escapeHtml(m.b)}</span>
-            <input type="text" id="scorerB-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
-            <label class="og"><input type="checkbox" id="ogB-${m.id}"> OG</label>
-            <button class="add" data-addgoal="${m.id}" data-team="b">+ ประตู</button>
-          </div>
-          <div class="logged">${rows}</div>
-          <div class="panel-foot">
-            <button class="switch" data-switchmode="${m.id}" data-to="manual">ระบุแค่สกอร์ ไม่ใส่ชื่อ</button>
-            <button class="close" data-closepanel="${m.id}">เสร็จแล้ว</button>
-          </div>
+    return `<div class="panel" id="panel-${m.id}">
+      <div class="manual-editor">
+        <div style="font-weight:700;margin-bottom:8px;">แก้สกอร์โดยตรง</div>
+        <div class="manual-row">
+          <input type="number" min="0" max="99" id="manA-${m.id}" value="${current.a}" aria-label="${escapeHtml(m.a)}">
+          <span style="color:var(--ink-dimmer)">–</span>
+          <input type="number" min="0" max="99" id="manB-${m.id}" value="${current.b}" aria-label="${escapeHtml(m.b)}">
+          <button class="save" data-savemanual="${m.id}">บันทึกสกอร์</button>
         </div>
-        <div style="display:${isManual?'block':'none'}" id="manualMode-${m.id}">
-          <div class="manual-row">
-            <input type="number" min="0" max="99" id="manA-${m.id}" value="${isManual ? rep.scoreA : ''}" placeholder="0">
-            <span style="color:var(--ink-dimmer)">–</span>
-            <input type="number" min="0" max="99" id="manB-${m.id}" value="${isManual ? rep.scoreB : ''}" placeholder="0">
-            <button class="save" data-savemanual="${m.id}">บันทึก</button>
-          </div>
-          <div class="panel-foot" style="border-top:none; margin-top:8px; padding-top:0;">
-            <button class="switch" data-switchmode="${m.id}" data-to="goals">ใส่ผู้ทำประตูทีละลูกแทน</button>
-            <button class="close" data-closepanel="${m.id}">เสร็จแล้ว</button>
-          </div>
+        <div class="panel-foot" style="border-top:none;margin-top:8px;padding-top:0;">
+          <button class="switch" data-switchmode="${m.id}" data-to="goals">ใส่ผู้ทำประตูแทน</button>
+          <button class="close" data-closepanel="${m.id}">ปิด</button>
         </div>
-      </div>`;
+      </div>
+
+      <div class="goals-editor" style="display:none" id="goalsMode-${m.id}">
+        <div class="goal-add">
+          <span class="team-lbl">${escapeHtml(m.a)}</span>
+          <input type="text" id="scorerA-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
+          <label class="og"><input type="checkbox" id="ogA-${m.id}"> OG</label>
+          <button class="add" data-addgoal="${m.id}" data-team="a">+ ประตู</button>
+        </div>
+        <div class="goal-add">
+          <span class="team-lbl">${escapeHtml(m.b)}</span>
+          <input type="text" id="scorerB-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
+          <label class="og"><input type="checkbox" id="ogB-${m.id}"> OG</label>
+          <button class="add" data-addgoal="${m.id}" data-team="b">+ ประตู</button>
+        </div>
+        <div class="logged">${rows}</div>
+        <div class="panel-foot">
+          <button class="switch" data-switchmode="${m.id}" data-to="manual">กลับไปแก้สกอร์</button>
+          <button class="close" data-closepanel="${m.id}">ปิด</button>
+        </div>
+      </div>
+    </div>`;
   }
 
   function renderDay(dayKey){
@@ -503,8 +512,10 @@
     document.querySelectorAll("[data-switchmode]").forEach(btn=>{
       btn.onclick = () => {
         const id = btn.dataset.switchmode, to = btn.dataset.to;
-        document.getElementById("goalsMode-"+id).style.display = to==="goals" ? "block" : "none";
-        document.getElementById("manualMode-"+id).style.display = to==="manual" ? "block" : "none";
+        const goals = document.getElementById("goalsMode-"+id);
+        const manual = document.querySelector("#panel-"+id+" .manual-editor");
+        if(goals) goals.style.display = to==="goals" ? "block" : "none";
+        if(manual) manual.style.display = to==="manual" ? "block" : "none";
       };
     });
     document.querySelectorAll("[data-savemanual]").forEach(btn=>{
@@ -515,9 +526,11 @@
         if(isNaN(a) || isNaN(b)){ showToast("กรอกสกอร์ทั้งสองฝั่งก่อน"); return; }
         reported[id] = {mode:"manual", scoreA:a, scoreB:b};
         const ok = await persist();
-        if(ok) showToast("บันทึกผลแล้ว");
-        render();
-        document.getElementById("panel-"+id).classList.add("open");
+        if(ok) {
+          showToast("บันทึกผลแล้ว ✓");
+          render();
+          document.getElementById("panel-"+id).classList.add("open");
+        }
       };
     });
   }
