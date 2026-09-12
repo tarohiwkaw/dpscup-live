@@ -1,9 +1,17 @@
-DPSCUP v20
+DPSCUP v21 — Preview Summary Fix
 
-ไฟล์หลัก: index.html, admin.html, summary.html, dpspn-logo.png
-เก็บ firebase-config.js เดิมไว้ใน GitHub
+แก้ปัญหาหน้าแรกไม่แสดงข้อมูลสรุปผลที่บันทึกแล้ว แต่หน้า summary.html แสดงข้อมูลได้
 
-Firebase Realtime Database Rules:
+ไฟล์:
+- index.html — แก้ให้โหลด dpscup-2-summary บนหน้าแรกจริง
+- admin.html — ระบบเดิมจาก v20
+- summary.html — ระบบเดิมจาก v20
+- dpspn-logo.png — โลโก้
+
+ให้แทนที่ index.html, admin.html, summary.html และ dpspn-logo.png ใน GitHub
+เก็บ firebase-config.js เดิมไว้
+
+Firebase Rules ที่ต้องมี:
 {
   "rules": {
     "dpscup-2-scores": { ".read": true, ".write": "auth != null" },
@@ -11,5 +19,3 @@ Firebase Realtime Database Rules:
     "dpscup-2-summary": { ".read": true, ".write": "auth != null" }
   }
 }
-
-ข้อมูลทีมในตารางการแข่งขันชุดปัจจุบันตามที่ผู้ใช้ระบุเป็น ม.ต้น ทั้งหมด จึงกำหนด group="ม.ต้น" ให้ทุกคู่ที่มีอยู่ในตาราง เพื่อให้ดาวซัลโวแยกถูกต้อง ไม่ตกไปอยู่ใน "ไม่ระบุรุ่น". ช่องสรุป ม.ปลายยังคงมีไว้สำหรับกรอกผลของ ม.ปลายเมื่อมีข้อมูล.
