@@ -1,15 +1,25 @@
-# DPSCUP Live Score
+# DPSCUP Live Score — Secure Admin
 
-## ไฟล์
-- `index.html` = หน้าให้คนดู
-- `admin.html` = หน้าแอดมินแก้สกอร์
-- `firebase-config.js` = config ของ Firebase
+## หน้าเว็บ
+- `index.html` = หน้าคนดู **ดูอย่างเดียว** ไม่มีปุ่มแก้สกอร์
+- `admin.html` = หน้าแอดมิน ต้อง Login ด้วย Firebase Authentication
+- `firebase-config.js` = Firebase config
+- `firebase-rules.json` = Rules ที่ใช้กับ Realtime Database
 
-## ตั้งค่า
-1. สร้างโปรเจกต์ใน Firebase Console
-2. เพิ่ม Web App และคัดลอก config ลง `firebase-config.js`
-3. เปิด Realtime Database
-4. สำหรับระบบจริง แนะนำเปิด Firebase Authentication และใช้ Rules:
+## ต้องทำใน Firebase ก่อนใช้ระบบแอดมิน
+
+1. Firebase Console → **Authentication**
+2. เปิด **Sign-in method**
+3. เปิด **Email/Password**
+4. ไปที่ **Users**
+5. กด **Add user**
+6. สร้างอีเมล + รหัสผ่านสำหรับแอดมิน
+7. ไม่ต้องเปิดระบบสมัครสมาชิกในเว็บ เพราะเรามีเฉพาะหน้า Login
+
+## Database Rules
+
+ตั้ง Realtime Database Rules เป็น:
+
 ```json
 {
   "rules": {
@@ -20,10 +30,22 @@
   }
 }
 ```
-5. สร้างบัญชีผู้ดูแลใน Authentication แล้วค่อยปรับหน้า admin ให้ล็อกอินด้วย Firebase Auth
-6. Deploy ทั้งโฟลเดอร์ไปยัง GitHub Pages / Netlify / Vercel
 
-### การทำงาน
-เมื่อแอดมินบันทึกผล `admin.html` จะเขียนข้อมูลไป Realtime Database และ `index.html` ที่คนอื่นเปิดอยู่จะรับ event แล้วเปลี่ยนคะแนนทันทีโดยไม่ต้อง refresh
+ผลคือ:
+- คนทั่วไปไม่ต้อง Login → อ่านคะแนนได้
+- คนทั่วไป → เขียน/แก้คะแนนไม่ได้
+- บัญชีที่ Login ด้วย Firebase Auth → เขียนคะแนนได้
 
-> PIN ในไฟล์ config เป็นเพียงชั้น UI และไม่ใช่ระบบความปลอดภัย เพราะผู้ใช้สามารถเห็น JavaScript ได้ ความปลอดภัยจริงควรใช้ Firebase Authentication + Database Rules
+เพื่อให้ปลอดภัย ควรสร้างเฉพาะบัญชีแอดมินใน Firebase และไม่เปิดช่องสมัครสมาชิกให้คนทั่วไป
+
+## เรียลไทม์
+
+แอดมินบันทึกคะแนน → Firebase Realtime Database → หน้า `index.html` ของคนดูที่เปิดอยู่รับการเปลี่ยนแปลงทันที
+
+ไม่ต้อง Refresh
+
+## Deploy
+
+อัปโหลด `index.html`, `admin.html`, `firebase-config.js` และ `firebase-rules.json` เข้า GitHub repository เดิม
+
+> `firebase-rules.json` เป็นไฟล์อ้างอิงสำหรับตั้งค่า Rules ไม่ได้ถูกโหลดโดยหน้าเว็บ

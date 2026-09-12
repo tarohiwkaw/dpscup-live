@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "dpscup-2-scores": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}

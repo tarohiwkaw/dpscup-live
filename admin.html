@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
 <style>
   :root{
@@ -175,7 +176,7 @@
   #adminGate{position:fixed;inset:0;background:rgba(10,21,34,.97);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
   #adminBox{width:min(420px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;padding:22px}
   #adminBox h2{margin:0 0 8px;font-family:'Chakra Petch',sans-serif}
-  #adminPin{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font-size:16px;margin:12px 0}
+  #adminEmail,#adminPassword{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font-size:16px;margin:12px 0}
   #adminEnter{width:100%;padding:11px;border:0;border-radius:9px;background:var(--amber);font-weight:700;cursor:pointer}
   #adminErr{color:var(--red);font-size:12px;margin-top:8px;min-height:18px}
 </style>
@@ -184,18 +185,20 @@
 <div id="adminGate">
   <div id="adminBox">
     <h2>เข้าสู่ระบบผู้ดูแล</h2>
-    <div style="color:var(--ink-dim);font-size:13px;line-height:1.6">ใช้หน้านี้สำหรับแก้สกอร์ ส่วนคนดูเปิด <b>index.html</b></div>
-    <input id="adminPin" type="password" placeholder="รหัสผู้ดูแล" autocomplete="off">
-    <button id="adminEnter">เข้าใช้งาน</button>
+    <div style="color:var(--ink-dim);font-size:13px;line-height:1.6">
+      เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น
+    </div>
+    <input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username">
+    <input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password">
+    <button id="adminEnter">เข้าสู่ระบบ</button>
     <div id="adminErr"></div>
   </div>
 </div>
-
 <div class="wrap">
   <header class="hero">
     <div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div>
     <h1 class="title">DPSCUP <span class="no">ADMIN</span></h1>
-    <div class="eyebrow" style="margin-top:-4px;">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>
+    <div class="eyebrow" style="margin-top:-4px;">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only" style="color:var(--amber)">🔐 เฉพาะแอดมินที่ล็อกอินแล้ว</div>
 
     <div class="toolbar">
       <button class="primary" id="printBtn">
@@ -203,6 +206,7 @@
         พิมพ์ / บันทึก PDF
       </button>
     </div>
+    <button id="logoutBtn" style="margin-top:8px;font-family:'Prompt',sans-serif;font-size:12px;color:var(--ink-dim);background:none;border:1px solid var(--line-strong);border-radius:8px;padding:7px 10px;cursor:pointer">ออกจากระบบ</button>
 
     <div class="next-line" id="nextLine">
       <div class="dot"></div>
@@ -650,19 +654,45 @@
 </script>
 <script>
 (function(){
-  const pin = window.DPSCUP_ADMIN_PIN || "";
   const gate = document.getElementById("adminGate");
-  const input = document.getElementById("adminPin");
+  const email = document.getElementById("adminEmail");
+  const password = document.getElementById("adminPassword");
   const btn = document.getElementById("adminEnter");
   const err = document.getElementById("adminErr");
-  function unlock(){
-    if(!pin){ err.textContent="ยังไม่ได้ตั้งค่า DPSCUP_ADMIN_PIN"; return; }
-    if(input.value===pin){ gate.style.display="none"; sessionStorage.setItem("dpscup-admin-ok","1"); }
-    else err.textContent="รหัสไม่ถูกต้อง";
+
+  function showError(message){ err.textContent = message; }
+
+  firebase.auth().onAuthStateChanged(user => {
+    if(user){
+      gate.style.display = "none";
+    }else{
+      gate.style.display = "flex";
+    }
+  });
+
+  async function login(){
+    showError("");
+    if(!email.value.trim() || !password.value){
+      showError("กรอกอีเมลและรหัสผ่านก่อน");
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "กำลังเข้าสู่ระบบ...";
+    try{
+      await firebase.auth().signInWithEmailAndPassword(email.value.trim(), password.value);
+    }catch(e){
+      console.error(e);
+      showError("เข้าสู่ระบบไม่สำเร็จ · ตรวจอีเมลและรหัสผ่าน");
+    }finally{
+      btn.disabled = false;
+      btn.textContent = "เข้าสู่ระบบ";
+    }
   }
-  btn.onclick=unlock;
-  input.addEventListener("keydown",e=>{if(e.key==="Enter") unlock();});
-  if(sessionStorage.getItem("dpscup-admin-ok")==="1") gate.style.display="none";
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if(logoutBtn) logoutBtn.onclick = () => firebase.auth().signOut();
+  btn.onclick = login;
+  password.addEventListener("keydown", e => { if(e.key==="Enter") login(); });
 })();
 </script></body>
 </html>

@@ -171,6 +171,8 @@
   .pr-pending{ font-size:12px; color:#999; font-style:italic; margin-left:3mm; }
   .pr-break{ text-align:center; font-size:11px; color:#999; margin:4mm 0; }
   .pdf-busy{ opacity:0.6; pointer-events:none; }
+
+  .view-only{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-dim);margin-top:10px;padding:5px 8px;border:1px solid var(--line);border-radius:999px}
 </style>
 </head>
 <body>
@@ -179,7 +181,7 @@
   <header class="hero">
     <div class="eyebrow">DPSPN · การแข่งขันฟุตบอลภายในโรงเรียน 26/27</div>
     <h1 class="title">DPSCUP <span class="no">ครั้งที่ 2</span></h1>
-    <div class="eyebrow" style="margin-top:-4px;">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>
+    <div class="eyebrow" style="margin-top:-4px;">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">👀 ผู้ชม · ดูคะแนนอย่างเดียว</div>
 
     <div class="toolbar">
       <button class="primary" id="printBtn">
@@ -358,12 +360,7 @@
       }).join("") + `</div>`;
     }
 
-    let actionHtml = "";
-    {
-      const rep = reported[m.id];
-      actionHtml = `<div class="m-action"><button data-toggle="${m.id}">${rep ? "แก้ไขผล" : (m.final ? "แก้ไขผลการแข่งขัน" : "+ รายงานผล / ผู้ทำประตู")}</button></div>
-        ${panelHtml(m)}`;
-    }
+    const actionHtml = "";
 
     return `
       <div class="match">
@@ -453,53 +450,7 @@
   }
 
   function bindEvents(){
-    document.querySelectorAll("[data-toggle]").forEach(btn=>{
-      btn.onclick = () => document.getElementById("panel-"+btn.dataset.toggle).classList.toggle("open");
-    });
-    document.querySelectorAll("[data-closepanel]").forEach(btn=>{
-      btn.onclick = () => document.getElementById("panel-"+btn.dataset.closepanel).classList.remove("open");
-    });
-    document.querySelectorAll("[data-addgoal]").forEach(btn=>{
-      btn.onclick = async () => {
-        const id = btn.dataset.addgoal, team = btn.dataset.team;
-        const scorer = document.getElementById(`scorer${team.toUpperCase()}-${id}`).value.trim();
-        const og = document.getElementById(`og${team.toUpperCase()}-${id}`).checked;
-        if(!reported[id] || reported[id].mode!=="goals") reported[id] = {mode:"goals", goals:[]};
-        reported[id].goals.push({team, scorer, og});
-        await persist();
-        render();
-        document.getElementById("panel-"+id).classList.add("open");
-      };
-    });
-    document.querySelectorAll("[data-rmgoal]").forEach(btn=>{
-      btn.onclick = async () => {
-        const id = btn.dataset.rmgoal, idx = parseInt(btn.dataset.idx,10);
-        reported[id].goals.splice(idx,1);
-        await persist();
-        render();
-        document.getElementById("panel-"+id).classList.add("open");
-      };
-    });
-    document.querySelectorAll("[data-switchmode]").forEach(btn=>{
-      btn.onclick = () => {
-        const id = btn.dataset.switchmode, to = btn.dataset.to;
-        document.getElementById("goalsMode-"+id).style.display = to==="goals" ? "block" : "none";
-        document.getElementById("manualMode-"+id).style.display = to==="manual" ? "block" : "none";
-      };
-    });
-    document.querySelectorAll("[data-savemanual]").forEach(btn=>{
-      btn.onclick = async () => {
-        const id = btn.dataset.savemanual;
-        const a = parseInt(document.getElementById("manA-"+id).value,10);
-        const b = parseInt(document.getElementById("manB-"+id).value,10);
-        if(isNaN(a) || isNaN(b)){ showToast("กรอกสกอร์ทั้งสองฝั่งก่อน"); return; }
-        reported[id] = {mode:"manual", scoreA:a, scoreB:b};
-        const ok = await persist();
-        if(ok) showToast("บันทึกผลแล้ว");
-        render();
-        document.getElementById("panel-"+id).classList.add("open");
-      };
-    });
+    // Public page is view-only. Editing exists only in admin.html.
   }
 
   // ---------- Tabs ----------
