@@ -224,7 +224,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     return `
       <div class="match">
         <div class="m-row">
-          <div class="m-time"><span class="grade-badge ${getMatchGrade(m)==="ม.ปลาย"?"senior":"junior"}">${getMatchGrade(m)}</span>${m.time || ""}</div>
+          <div class="m-time"><span class="grade-badge ${getMatchGrade(m)==="ม.ปลาย"?"senior":"junior"}">${getMatchGrade(m)}</span><span>${m.time || ""}</span></div>
           <div class="m-teams">
             <div class="m-names">
               <div class="m-name ${aWin?'win':bWin?'lose':''}">${escapeHtml(m.a)}</div>
