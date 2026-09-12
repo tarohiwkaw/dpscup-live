@@ -29,7 +29,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     {id:"fri-1", day:"fri", group:"ม.ต้น", time:"16:30", a:"DARK RAVEN X VORTEX", b:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", final:true,
       goals:[{team:"b", scorer:"กิรติ", og:true}]},
     {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO โล้น", b:"เสืออ้วน X YIYA KATONG", final:true,
-      goals:[{team:"a", scorer:"ฮานีฟ (โล้น)"},{team:"a", scorer:"ฮานีฟ (โล้น)"},{team:"a", scorer:"ฮานีฟ (โล้น)"}]},
+      goals:[{team:"a", scorer:"ฮานีฟ"},{team:"a", scorer:"ฮานีฟ"},{team:"a", scorer:"ฮานีฟ"}]},
     {id:"fri-3", day:"fri", group:"ม.ต้น", time:"17:10", a:"HUFFAZ WORRIORS FC", b:"VORTEX", final:true,
       goals:[{team:"b", scorer:"อัรฟาริส"},{team:"b", scorer:"รุชดาน"},{team:"b", scorer:"อัรฮาม"}]},
     {id:"fri-4", day:"fri", group:"ม.ต้น", time:"17:30", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด", final:true,
@@ -141,6 +141,10 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     return {mode:"goals", ...scoreFromGoals(rep.goals || [])};
   }
 
+  function normalizeScorerName(name){
+    return String(name||"").replace(/\s*\(โล้น\)\s*/g, " ").replace(/คายรุนอานาม/g, "คอยรุนอานาม").trim();
+  }
+
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
@@ -159,7 +163,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     map.clear(); totalGoals=0; played=0;
     MATCHES.forEach(m=>{ if(m.isBreak) return; const res=currentResult(m); if(!res) return; played++;
       if(res.mode==="goals"){ const goals=(reported[m.id] && Array.isArray(reported[m.id].goals)) ? reported[m.id].goals : (m.final?m.goals:[]);
-        goals.forEach(g=>{ if(g.og) return; if(!g.scorer) return; totalGoals++; const key=g.scorer+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:g.scorer,team:g.team==='a'?m.a:m.b,group:m.group||'ไม่ระบุรุ่น',goals:0}; x.goals++; map.set(key,x); });
+        goals.forEach(g=>{ if(g.og) return; if(!g.scorer) return; totalGoals++; const scorerName=normalizeScorerName(g.scorer); if(!scorerName) return; const key=scorerName+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:scorerName,team:g.team==='a'?m.a:m.b,group:m.group||'ไม่ระบุรุ่น',goals:0}; x.goals++; map.set(key,x); });
       } else totalGoals += Number(res.a||0)+Number(res.b||0);
     });
     return {rows:Array.from(map.values()).sort((a,b)=>b.goals-a.goals || a.name.localeCompare(b.name,'th')),totalGoals,played};
