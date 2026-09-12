@@ -204,6 +204,14 @@
   #adminEmail,#adminPassword{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font-size:16px;margin:12px 0}
   #adminEnter{width:100%;padding:11px;border:0;border-radius:9px;background:var(--amber);font-weight:700;cursor:pointer}
   #adminErr{color:var(--red);font-size:12px;margin-top:8px;min-height:18px}
+
+  /* ---------- DPSCUP admin premium refresh ---------- */
+  header.hero{position:relative;overflow:hidden}
+  header.hero:before{content:"";position:absolute;inset:-50px -20px auto;height:190px;background:radial-gradient(circle at 15% 25%,rgba(225,82,82,.20),transparent 40%),radial-gradient(circle at 90% 10%,rgba(245,166,35,.12),transparent 38%);pointer-events:none}
+  header.hero>*{position:relative}
+  .admin-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:rgba(225,82,82,.13);border:1px solid rgba(225,82,82,.35);color:#ff8d8d;font-size:10px;font-weight:600;margin-top:8px}
+  .admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:13px}.admin-stat{padding:9px 7px;text-align:center;background:rgba(18,38,65,.8);border:1px solid var(--line);border-radius:10px}.admin-stat b{display:block;font-family:'Chakra Petch';font-size:18px}.admin-stat span{font-size:9px;color:var(--ink-dim)}
+  .top-admin{margin:14px 0 6px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:rgba(10,21,34,.5)}.top-admin-title{padding:8px 10px;font-size:11px;font-weight:600;color:var(--amber);border-bottom:1px solid var(--line)}.top-admin-row{display:grid;grid-template-columns:25px 1fr auto;gap:7px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:11px}.top-admin-row:last-child{border-bottom:0}.top-admin-row small{display:block;color:var(--ink-dim);font-size:9px}.top-admin-row b{font-family:'Chakra Petch';font-size:16px}
 </style>
 </head>
 <body>
@@ -245,6 +253,7 @@
     <button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button>
   </nav>
 
+  <div class="top-admin" id="topAdmin"><div class="top-admin-title">👑 TOP SCORERS · จากข้อมูลที่บันทึกแล้ว</div></div>
   <section class="day" id="day-fri"></section>
   <section class="day" id="day-sat"></section>
   <section class="day" id="day-sun"></section>
@@ -485,6 +494,17 @@
     </div>`;
   }
 
+  function renderAdminStats(){
+    const map=new Map(); let played=0,totalGoals=0;
+    MATCHES.forEach(m=>{if(m.isBreak)return; const r=currentResult(m); if(!r)return; played++;
+      if(r.mode==='goals'){ const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]); gs.forEach(g=>{if(g.og)return; if(g.scorer){const key=g.scorer+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:g.scorer,team:g.team==='a'?m.a:m.b,goals:0}; x.goals++;map.set(key,x);totalGoals++;}}); }
+      else totalGoals+=Number(r.a||0)+Number(r.b||0);
+    });
+    const e=id=>document.getElementById(id); if(e('aStatMatches'))e('aStatMatches').textContent=MATCHES.filter(m=>!m.isBreak).length; if(e('aStatPlayed'))e('aStatPlayed').textContent=played; if(e('aStatGoals'))e('aStatGoals').textContent=totalGoals;
+    const rows=Array.from(map.values()).sort((a,b)=>b.goals-a.goals).slice(0,5); const box=e('topAdmin'); if(!box)return;
+    box.innerHTML='<div class="top-admin-title">👑 TOP SCORERS · จากข้อมูลที่บันทึกแล้ว</div>'+(rows.length?rows.map((r,i)=>`<div class="top-admin-row"><span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span><div><b>${escapeHtml(r.name)}</b><small>${escapeHtml(r.team)}</small></div><b>${r.goals}</b></div>`).join(''):'<div style="padding:10px;color:var(--ink-dimmer);font-size:10px;text-align:center">ยังไม่มีข้อมูลผู้ทำประตู</div>');
+  }
+
   function renderDay(dayKey){
     const el = document.getElementById("day-" + dayKey);
     const items = MATCHES.filter(m => m.day === dayKey);
@@ -507,6 +527,7 @@
     openPanels.forEach(id => { const p = document.getElementById("panel-"+id); if(p) p.classList.add("open"); });
     bindEvents();
     renderNextLine();
+    renderAdminStats();
   }
 
   function bindEvents(){
@@ -631,7 +652,12 @@
   const DAY_TITLES = {fri:"Score วันศุกร์ที่ 11 กันยายน 2569", sat:"Score วันเสาร์ที่ 12 กันยายน 2569", sun:"Score วันอาทิตย์ที่ 13 กันยายน 2569"};
 
   function buildPrintReport(){
-    let html = "";
+    const scorerMap=new Map();
+    MATCHES.forEach(m=>{if(m.isBreak)return;const r=currentResult(m);if(!r||r.mode!=="goals")return;const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]);gs.forEach(g=>{if(g.og||!g.scorer)return;const key=g.scorer+'||'+(g.team==='a'?m.a:m.b);const x=scorerMap.get(key)||{name:g.scorer,team:g.team==='a'?m.a:m.b,goals:0};x.goals++;scorerMap.set(key,x);});});
+    const scorers=Array.from(scorerMap.values()).sort((a,b)=>b.goals-a.goals).slice(0,10);
+    let html = `<div class="pr-day"><div class="pr-title">DPSCUP ครั้งที่ 2 — รายงานผลการแข่งขัน</div><div class="pr-venue">11–13 กันยายน 2569 · สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="pr-group">👑 TOP SCORERS</div>`;
+    if(scorers.length) scorers.forEach((r,i)=>html+=`<div class="pr-goal"><b>${i+1}. ${escapeHtml(r.name)}</b> — ${escapeHtml(r.team)} · <b>${r.goals} ประตู</b></div>`); else html+='<div class="pr-pending">ยังไม่มีข้อมูลผู้ทำประตู</div>';
+    html+='</div>';
     ["fri","sat","sun"].forEach(dayKey=>{
       const items = MATCHES.filter(m => m.day===dayKey);
       html += `<div class="pr-day"><div class="pr-title">${DAY_TITLES[dayKey]}</div><div class="pr-venue">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>`;

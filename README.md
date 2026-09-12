@@ -1,7 +1,8 @@
-DPSCUP Live Score v10
+# DPSCUP Live v12 — Premium UI + Top Scorers
 
-แก้ระบบ PDF สำหรับ iPad/Safari โดยสร้าง PDF ด้วย html2canvas + jsPDF แทน Print Preview
-
-ให้นำ admin.html ไปแทนไฟล์เดิมใน GitHub เท่านั้น ไม่ต้องแก้ Firebase และไม่ต้องลบข้อมูลเดิม
-
-หลังอัปโหลด ให้รีเฟรชหน้า Admin แล้วกด “พิมพ์ / บันทึก PDF” ระบบจะสร้าง PDF และเปิดไฟล์ PDF ให้ จากนั้นใช้ปุ่ม Share ของ Safari เพื่อบันทึกลง Files
+- Refreshed public viewer UI with premium tournament styling.
+- Added live stats and automatic Top Scorers leaderboard.
+- Added Top Scorers to PDF report.
+- Admin page refreshed with admin dashboard stats and Top Scorers.
+- Firebase config is intentionally not included; keep the existing `firebase-config.js`.
+- Replacing these HTML files does not delete Firebase data.

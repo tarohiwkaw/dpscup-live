@@ -173,6 +173,24 @@
   .pdf-busy{ opacity:0.6; pointer-events:none; }
 
   .view-only{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-dim);margin-top:10px;padding:5px 8px;border:1px solid var(--line);border-radius:999px}
+
+  /* ---------- DPSCUP 2026 premium refresh ---------- */
+  .hero{position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;inset:-40px -20px auto;height:190px;background:radial-gradient(circle at 20% 30%,rgba(225,82,82,.22),transparent 42%),radial-gradient(circle at 85% 15%,rgba(245,166,35,.14),transparent 38%);pointer-events:none}
+  .hero>*{position:relative}
+  .brand-line{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .brand-badge{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,#b51f2b,#ef4444);padding:6px 9px;border-radius:7px;font-weight:700;box-shadow:0 8px 24px rgba(225,82,82,.22)}
+  .hero-sub{font-size:12px;color:var(--ink-dim);line-height:1.7;max-width:520px}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 4px}
+  .stat-card{background:linear-gradient(145deg,rgba(22,48,79,.95),rgba(18,38,65,.85));border:1px solid var(--line-strong);border-radius:12px;padding:11px 9px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+  .stat-icon{font-size:15px}.stat-num{font-family:'Chakra Petch';font-size:20px;font-weight:700;margin-top:2px}.stat-label{font-size:10px;color:var(--ink-dim)}
+  .section-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:24px 0 9px}
+  .section-head h2{font-family:'Chakra Petch';font-size:21px;margin:0}.section-head span{font-size:10px;color:var(--ink-dimmer)}
+  .scorers-box{border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:linear-gradient(145deg,#10233a,#0d1c2d);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+  .scorer-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.scorer-row:last-child{border-bottom:0}
+  .rank{font-family:'Chakra Petch';font-weight:700;font-size:14px;text-align:center}.rank.gold{font-size:18px}.scorer-name{font-size:12px;font-weight:600}.scorer-team{font-size:10px;color:var(--ink-dim);margin-top:1px}.scorer-goals{font-family:'Chakra Petch';font-size:19px;font-weight:700}.scorer-goals small{font-family:'Prompt';font-size:9px;color:var(--ink-dim);font-weight:400;margin-left:2px}
+  .empty-scorers{padding:16px;text-align:center;color:var(--ink-dimmer);font-size:11px}
+  @media(max-width:420px){.stats-grid{grid-template-columns:repeat(3,1fr)}.stat-num{font-size:18px}.scorer-row{padding:9px 10px}}
 </style>
 </head>
 <body>
@@ -181,7 +199,14 @@
   <header class="hero">
     <div class="eyebrow">DPSPN · การแข่งขันฟุตบอลภายในโรงเรียน 26/27</div>
     <h1 class="title">DPSCUP <span class="no">ครั้งที่ 2</span></h1>
-    <div class="eyebrow" style="margin-top:-4px;">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">👀 ผู้ชม · ดูคะแนนอย่างเดียว</div>
+    <div class="brand-line"><div class="eyebrow">DPSPN · FOOTBALL TOURNAMENT 2026</div><div class="brand-badge">LIVE SCORE</div></div>
+    <div class="eyebrow" style="margin-top:-4px;">📍 สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">👀 ผู้ชม · ดูคะแนนอย่างเดียว</div>
+    <div class="hero-sub" style="margin-top:10px;">PLAY · FRIENDSHIP · RESPECT · TOGETHER — ติดตามผลการแข่งขันและดาวซัลโวแบบเรียลไทม์</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-num">11–13</div><div class="stat-label">กันยายน 2569</div></div>
+      <div class="stat-card"><div class="stat-icon">⚽</div><div class="stat-num" id="statMatches">—</div><div class="stat-label">คู่แข่งขัน</div></div>
+      <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-num" id="statGoals">—</div><div class="stat-label">ประตูรวม</div></div>
+    </div>
 
     <div class="toolbar">
       <button class="primary" id="printBtn">
@@ -201,6 +226,9 @@
     <button data-day="sat"><span class="d">เสาร์ 12 ก.ย.</span><span class="sub">รอบเช้า–บ่าย</span></button>
     <button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button>
   </nav>
+
+  <div class="section-head"><h2>👑 TOP SCORERS</h2><span>อัปเดตจากผลการแข่งขัน</span></div>
+  <div class="scorers-box" id="topScorers"><div class="empty-scorers">กำลังโหลดข้อมูลดาวซัลโว…</div></div>
 
   <section class="day" id="day-fri"></section>
   <section class="day" id="day-sat"></section>
@@ -332,12 +360,40 @@
     if(!rep && m.final) return {mode:"goals", ...scoreFromGoals(m.goals)};
 
     if(!rep) return null;
-    if(rep.mode==="manual") return {mode:"manual", a:rep.scoreA, b:rep.scoreB, steps:[]};
+    if(rep.mode==="manual") return {mode:"manual", a:rep.scoreA, b:rep.scoreB, steps:scoreFromGoals(rep.goals||[]).steps};
     return {mode:"goals", ...scoreFromGoals(rep.goals || [])};
   }
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  // ---------- Statistics ----------
+  function getScorerStats(){
+    const map = new Map(); let totalGoals=0; let played=0;
+    MATCHES.forEach(m=>{ if(m.isBreak) return; const res=currentResult(m); if(res){played++; if(res.mode==="goals") res.steps.forEach(st=>{
+      // Recover scorer from goal sequence label; ignore OG for scorer leaderboard.
+      const raw=st.label||""; const og=/เข้าประตูตัวเอง|\(OG\)/i.test(raw);
+      if(!og && raw && raw!=="ไม่ระบุชื่อ"){ const name=raw.replace(/\s*\(เข้าประตูตัวเอง\)|\s*\(OG\)/ig,"").trim(); if(name){
+        totalGoals++; const team=(m.a && st.a>0) ? (null) : null;
+      }}
+    }); else { totalGoals += Number(res.a||0)+Number(res.b||0); } } });
+    // Use original goal arrays where available, which preserves the actual scorer/team pair.
+    map.clear(); totalGoals=0; played=0;
+    MATCHES.forEach(m=>{ if(m.isBreak) return; const res=currentResult(m); if(!res) return; played++;
+      if(res.mode==="goals"){ const goals=(reported[m.id] && Array.isArray(reported[m.id].goals)) ? reported[m.id].goals : (m.final?m.goals:[]);
+        goals.forEach(g=>{ if(g.og) return; if(!g.scorer) return; totalGoals++; const key=g.scorer+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:g.scorer,team:g.team==='a'?m.a:m.b,goals:0}; x.goals++; map.set(key,x); });
+      } else totalGoals += Number(res.a||0)+Number(res.b||0);
+    });
+    return {rows:Array.from(map.values()).sort((a,b)=>b.goals-a.goals || a.name.localeCompare(b.name,'th')),totalGoals,played};
+  }
+  function renderStats(){
+    const st=getScorerStats();
+    const matchesEl=document.getElementById('statMatches'); if(matchesEl) matchesEl.textContent=MATCHES.filter(m=>!m.isBreak).length;
+    const goalsEl=document.getElementById('statGoals'); if(goalsEl) goalsEl.textContent=st.totalGoals;
+    const box=document.getElementById('topScorers'); if(!box) return;
+    if(!st.rows.length){box.innerHTML='<div class="empty-scorers">ยังไม่มีข้อมูลผู้ทำประตู</div>';return;}
+    let rank=0,last=-1; box.innerHTML=st.rows.slice(0,8).map((r,i)=>{if(r.goals!==last){rank=i+1;last=r.goals;} const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':rank; return `<div class="scorer-row"><div class="rank ${rank===1?'gold':''}">${medal}</div><div><div class="scorer-name">${escapeHtml(r.name)}</div><div class="scorer-team">${escapeHtml(r.team)}</div></div><div class="scorer-goals">${r.goals}<small>ประตู</small></div></div>`;}).join('');
   }
 
   // ---------- Card rendering ----------
@@ -447,6 +503,7 @@
     openPanels.forEach(id => { const p = document.getElementById("panel-"+id); if(p) p.classList.add("open"); });
     bindEvents();
     renderNextLine();
+    renderStats();
   }
 
   function bindEvents(){
@@ -494,7 +551,10 @@
   const DAY_TITLES = {fri:"Score วันศุกร์ที่ 11 กันยายน 2569", sat:"Score วันเสาร์ที่ 12 กันยายน 2569", sun:"Score วันอาทิตย์ที่ 13 กันยายน 2569"};
 
   function buildPrintReport(){
-    let html = "";
+    let html = `<div class="pr-day"><div class="pr-title">DPSCUP ครั้งที่ 2 — รายงานการแข่งขัน</div><div class="pr-venue">11–13 กันยายน 2569 · สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="pr-group">👑 TOP SCORERS</div>`;
+    const st=getScorerStats();
+    if(st.rows.length){ st.rows.slice(0,10).forEach((r,i)=> html += `<div class="pr-goal"><b>${i+1}. ${escapeHtml(r.name)}</b> — ${escapeHtml(r.team)} · <b>${r.goals} ประตู</b></div>`); } else html += `<div class="pr-pending">ยังไม่มีข้อมูลผู้ทำประตู</div>`;
+    html += `<div class="pr-group">📊 ผลการแข่งขัน</div></div>`;
     ["fri","sat","sun"].forEach(dayKey=>{
       const items = MATCHES.filter(m => m.day===dayKey);
       html += `<div class="pr-day"><div class="pr-title">${DAY_TITLES[dayKey]}</div><div class="pr-venue">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>`;
