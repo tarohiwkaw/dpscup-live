@@ -9,6 +9,16 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
 @media(max-width:720px){.wrap{padding:0 14px 30px}.nav-links{gap:10px;font-size:11px}.hero{padding:20px;border-radius:18px}.live-badge{position:static;display:inline-block;margin-top:12px}.title{font-size:48px}.summary-grid{grid-template-columns:1fr 1fr}.site-footer{grid-template-columns:1fr;text-align:center}.footer-brand{justify-content:center}.footer-social{justify-content:center}.m-row{gap:7px}.m-time{width:44px}.m-score{font-size:20px}.goal-log{margin-left:51px}}
 
 .grade-badge{display:inline-block;margin-bottom:4px;padding:2px 7px;border-radius:999px;font:700 9px/1.2 Prompt,sans-serif;letter-spacing:.1px;border:1px solid #cfe0f5;background:#eef6ff;color:#1769e0;white-space:nowrap}.grade-badge.senior{background:#f3edff;border-color:#dfccff;color:#7b3fe4}.grade-badge.junior{background:#eef6ff;border-color:#cfe0f5;color:#1769e0}.m-time{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px}
+
+/* v28 premium match cards */
+.match{padding:14px 18px 13px;border-radius:18px;background:#fff;border:1px solid #d8e5f5;box-shadow:0 10px 28px rgba(14,63,120,.06)}
+.match-meta{display:flex;align-items:center;gap:8px;font-size:10px;color:#8aa0bb;margin-bottom:10px}
+.grade-badge{padding:3px 8px;border-radius:999px;font-size:9px;font-weight:700}.grade-badge.junior{background:#eaf3ff;color:#1769e0}.grade-badge.senior{background:#f1eaff;color:#7c3aed}
+.match-main{display:grid;grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);align-items:center;gap:12px}
+.match-team{font-size:15px;line-height:1.45;font-weight:600;color:#173b6d}.team-b{text-align:right}.match-team.winner{font-weight:800;color:#062b67}.match-team.loser{color:#91a3ba;font-weight:500}
+.match-score{text-align:center}.m-score{font-family:'Chakra Petch';font-size:30px;font-weight:700;color:#062b67;white-space:nowrap}.m-score .dash{color:#9eb0c5;margin:0 7px}.m-score.tbd{font-family:'Prompt';font-size:11px;color:#91a3ba}
+.goal-log{margin:12px 0 0;padding:9px 0 0;border-top:1px solid #edf2f8;display:flex;flex-wrap:wrap;gap:7px 16px;font-size:11px;color:#617895}.goal-item{display:flex;align-items:center;gap:6px}.goal-dot{width:6px;height:6px;border-radius:50%;background:#1769e0}.goal-item.gb .goal-dot{background:#7c3aed}.goal-item small{color:#a0adbd;font-size:9px}
+@media(max-width:650px){.match-main{grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:8px}.match-team{font-size:13px}.m-score{font-size:26px}}
 </style>
 \n<body>\n<div class="wrap" id="top">
 <nav class="top-nav"><a class="nav-brand" href="#top"><img src="dpspn-logo.png" alt="DPSPN"><span>DPSCUP <small>2026</small></span></a><div class="nav-links"><a href="#matches">ผลการแข่งขัน</a><a href="#stats">ดาวซัลโว</a><a href="summary.html">สรุปผล</a><a href="bracket.html">ผังการแข่งขัน</a><a href="#issueOpen">รายงานปัญหา</a></div></nav>
@@ -30,7 +40,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
   const MATCHES = [
     {id:"fri-1", day:"fri", group:"ม.ต้น", time:"16:30", a:"DARK RAVEN X VORTEX", b:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", final:true,
       goals:[{team:"b", scorer:"กิรติ", og:true}]},
-    {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO โล้น", b:"เสืออ้วน X YIYA KATONG", final:true,
+    {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO", b:"เสืออ้วน X YIYA KATONG", final:true,
       goals:[{team:"a", scorer:"ฮานีฟ"},{team:"a", scorer:"ฮานีฟ"},{team:"a", scorer:"ฮานีฟ"}]},
     {id:"fri-3", day:"fri", group:"ม.ต้น", time:"17:10", a:"HUFFAZ WORRIORS FC", b:"VORTEX", final:true,
       goals:[{team:"b", scorer:"อัรฟาริส"},{team:"b", scorer:"รุชดาน"},{team:"b", scorer:"อัรฮาม"}]},
@@ -40,7 +50,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     {id:"sat-0",  day:"sat", group:"ม.ต้น", start:"2026-09-12T07:00:00+07:00", end:"2026-09-12T07:20:00+07:00", time:"07:00", a:"บูเดาะบูล่ะห์", b:"ลุงโชเล่ X ปูดอง"},
     {id:"sat-0b", day:"sat", group:"ม.ต้น", start:"2026-09-12T07:20:00+07:00", end:"2026-09-12T07:40:00+07:00", time:"07:20", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ซีเครท"},
     {id:"sat-1",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:20:00+07:00", end:"2026-09-12T08:40:00+07:00", time:"08:20", a:"DARK RAVENS X VORTEX", b:"อาหรับน้อยร้อยลีลา"},
-    {id:"sat-2",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:40:00+07:00", end:"2026-09-12T09:00:00+07:00", time:"08:40", a:"ลูกชายคนโต X TWO โล้น", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
+    {id:"sat-2",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:40:00+07:00", end:"2026-09-12T09:00:00+07:00", time:"08:40", a:"ลูกชายคนโต X TWO", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
     {id:"sat-3",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:00:00+07:00", end:"2026-09-12T09:20:00+07:00", time:"09:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"Dewan G.20"},
     {id:"sat-4",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:20:00+07:00", end:"2026-09-12T09:40:00+07:00", time:"09:20", a:"TSP รุ่นที่ 4 ACADEMY 1", b:"ชาคริต X น้องกา"},
     {id:"sat-5",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:40:00+07:00", end:"2026-09-12T10:00:00+07:00", time:"09:40", a:"น้องใหม่ X Q-CHANGE", b:"ทีมงาน X อาเซียน"},
@@ -55,7 +65,6 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     {id:"sat-12", day:"sat", group:"ม.ต้น", start:"2026-09-12T13:40:00+07:00", end:"2026-09-12T14:00:00+07:00", time:"13:40", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ทีเด็ด"},
     {id:"sat-13", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:00:00+07:00", end:"2026-09-12T14:20:00+07:00", time:"14:00", a:"VORTEX", b:"ชาคริต X น้องกา"},
     {id:"sat-14", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:20:00+07:00", end:"2026-09-12T14:40:00+07:00", time:"14:20", a:"ลุงโชเล่ X ปูดอง", b:"ทีมงาน X อาเซียน"},
-    {id:"sat-15", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:40:00+07:00", end:"2026-09-12T15:00:00+07:00", time:"14:40", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด"},
     {id:"sat-16", day:"sat", group:"ม.ต้น", start:"2026-09-12T15:00:00+07:00", end:"2026-09-12T15:20:00+07:00", time:"15:00", a:"HUFFAZ WORRIORS FC", b:"ชาคริต X น้องกา"},
 
     {id:"sun-1", day:"sun", group:"ม.ต้น", start:"2026-09-13T08:30:00+07:00", end:"2026-09-13T08:50:00+07:00", time:"08:30", a:"บูเดาะบูล่ะห์", b:"ทีมงาน X อาเซียน"},
@@ -63,9 +72,9 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     {id:"sun-3", day:"sun", group:"ม.ต้น", start:"2026-09-13T09:10:00+07:00", end:"2026-09-13T09:30:00+07:00", time:"09:10", a:"ลุงโชเล่ X ปูดอง", b:"น้องใหม่ X Q-CHANGE"},
   ];
 
-  // รุ่นการแข่งขัน: ทีม 4 ชุดนี้เป็น ม.ปลายตามรายชื่อที่เหลือจากผัง ม.ต้น
-  const SENIOR_TEAMS = new Set(['ไม่ได้แชมป์ ไม่ขึ้นมัสยิด','วัยรุ่นสายฮา X ทีเด็ด','Dewan G.20','วัยรุ่นสายฮา X ซีเครท']);
-  function getMatchGrade(m){ return (SENIOR_TEAMS.has(m.a) || SENIOR_TEAMS.has(m.b)) ? 'ม.ปลาย' : 'ม.ต้น'; }
+  // แยกรุ่นจากโครงสร้างการแข่งขันจริง: ม.ปลายมี 4 ทีม พบกันหมด 6 คู่
+  const SENIOR_MATCH_IDS = new Set(['fri-4','sat-0b','sat-3','sat-6','sat-9','sat-12']);
+  function getMatchGrade(m){ return SENIOR_MATCH_IDS.has(m.id) ? 'ม.ปลาย' : 'ม.ต้น'; }
 
   const STORAGE_KEY = "dpscup-2-scores";
   const REPORTS_KEY = "dpscup-2-reports";
@@ -148,7 +157,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
   }
 
   function normalizeScorerName(name){
-    return String(name||"").replace(/\s*\(โล้น\)\s*/g, " ").replace(/คายรุนอานาม/g, "คอยรุนอานาม").trim();
+    return String(name||"").replace(/\s*\(โล้น\)\s*/g, " ").replace(/คอยรุนอานาม/g, "คอยรุนอานาม").trim();
   }
 
   function escapeHtml(s){
@@ -158,19 +167,19 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
   // ---------- Statistics ----------
   function getScorerStats(){
     const map = new Map(); let totalGoals=0; let played=0;
-    MATCHES.forEach(m=>{ if(m.isBreak) return; const res=currentResult(m); if(res){played++; if(res.mode==="goals") res.steps.forEach(st=>{
-      // Recover scorer from goal sequence label; ignore OG for scorer leaderboard.
-      const raw=st.label||""; const og=/เข้าประตูตัวเอง|\(OG\)/i.test(raw);
-      if(!og && raw && raw!=="ไม่ระบุชื่อ"){ const name=raw.replace(/\s*\(เข้าประตูตัวเอง\)|\s*\(OG\)/ig,"").trim(); if(name){
-        totalGoals++; const team=(m.a && st.a>0) ? (null) : null;
-      }}
-    }); else { totalGoals += Number(res.a||0)+Number(res.b||0); } } });
-    // Use original goal arrays where available, which preserves the actual scorer/team pair.
-    map.clear(); totalGoals=0; played=0;
-    MATCHES.forEach(m=>{ if(m.isBreak) return; const res=currentResult(m); if(!res) return; played++;
-      if(res.mode==="goals"){ const goals=(reported[m.id] && Array.isArray(reported[m.id].goals)) ? reported[m.id].goals : (m.final?m.goals:[]);
-        goals.forEach(g=>{ if(g.og) return; if(!g.scorer) return; totalGoals++; const scorerName=normalizeScorerName(g.scorer); if(!scorerName) return; const key=scorerName+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:scorerName,team:g.team==='a'?m.a:m.b,group:getMatchGrade(m),goals:0}; x.goals++; map.set(key,x); });
-      } else totalGoals += Number(res.a||0)+Number(res.b||0);
+    MATCHES.forEach(m=>{
+      if(m.isBreak) return;
+      const res=currentResult(m); if(!res) return;
+      played++;
+      const goals = (reported[m.id] && Array.isArray(reported[m.id].goals)) ? reported[m.id].goals : (m.final ? (m.goals||[]) : []);
+      goals.forEach(g=>{
+        if(g.og || !g.scorer) return;
+        const scorerName=normalizeScorerName(g.scorer); if(!scorerName) return;
+        const team=g.team==='a'?m.a:m.b;
+        const key=scorerName+'||'+team+'||'+getMatchGrade(m);
+        const x=map.get(key)||{name:scorerName,team,group:getMatchGrade(m),goals:0};
+        x.goals++; totalGoals++; map.set(key,x);
+      });
     });
     return {rows:Array.from(map.values()).sort((a,b)=>b.goals-a.goals || a.name.localeCompare(b.name,'th')),totalGoals,played};
   }
@@ -202,100 +211,42 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
   // ---------- Card rendering ----------
   function matchCard(m){
     if(m.isBreak) return `<div class="break-row">— ${m.label} · ${m.time} —</div>`;
-
-    const res = currentResult(m);
-    const hasScore = !!res;
-    const aWin = hasScore && res.a > res.b, bWin = hasScore && res.b > res.a;
-
-    const scoreHtml = hasScore
-      ? `<span class="m-score">${res.a}<span class="dash">–</span>${res.b}</span>`
-      : `<span class="m-score tbd">ยังไม่แข่ง</span>`;
-
-    let goalLogHtml = "";
-    if(hasScore && res.mode==="goals" && res.steps.length){
-      goalLogHtml = `<div class="goal-log">` + res.steps.map((s,i)=>{
-        const isLast = i===res.steps.length-1;
-        return `<div class="${isLast?'g-final':''}">${s.a}-${s.b}${s.label ? " ⚽ "+escapeHtml(s.label) : " ⚽"}</div>`;
-      }).join("") + `</div>`;
+    const res=currentResult(m);
+    const hasScore=!!res;
+    const aWin=hasScore && Number(res.a)>Number(res.b), bWin=hasScore && Number(res.b)>Number(res.a);
+    const scoreHtml=hasScore ? `<span class="m-score">${res.a}<span class="dash">–</span>${res.b}</span>` : `<span class="m-score tbd">ยังไม่แข่ง</span>`;
+    const goals=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?(m.goals||[]):[]);
+    let goalLogHtml='';
+    if(hasScore && goals.length){
+      const valid=goals.filter(g=>g.scorer||g.og);
+      if(valid.length){
+        goalLogHtml=`<div class="goal-log">${valid.map(g=>{
+          const nm=normalizeScorerName(g.scorer||'');
+          return `<div class="goal-item ${g.team==='a'?'ga':'gb'}"><span class="goal-dot"></span><span>${escapeHtml(nm||'เข้าประตูตัวเอง')}${g.og?' <small>(OG)</small>':''}</span></div>`;
+        }).join('')}</div>`;
+      }
     }
-
-    const actionHtml = "";
-
-    return `
-      <div class="match">
-        <div class="m-row">
-          <div class="m-time"><span class="grade-badge ${getMatchGrade(m)==="ม.ปลาย"?"senior":"junior"}">${getMatchGrade(m)}</span><span>${m.time || ""}</span></div>
-          <div class="m-teams">
-            <div class="m-names">
-              <div class="m-name ${aWin?'win':bWin?'lose':''}">${escapeHtml(m.a)}</div>
-              <div class="m-name ${bWin?'win':aWin?'lose':''}" style="margin-top:3px;">${escapeHtml(m.b)}</div>
-            </div>
-            ${scoreHtml}
-          </div>
-        </div>
-        ${goalLogHtml}
-        ${actionHtml}
-      </div>`;
-  }
-
-  function panelHtml(m){
-    const rep = reported[m.id] || {mode:"goals", goals:[]};
-    const isManual = rep.mode === "manual";
-    const goals = rep.goals || [];
-    const rows = goals.map((g,i)=>{
-      const run = scoreFromGoals(goals.slice(0,i+1));
-      const label = g.scorer ? g.scorer + (g.og ? " (OG)" : "") : (g.og ? "เข้าประตูตัวเอง" : "ไม่ระบุชื่อ");
-      return `<div class="logged-row"><span class="sc">${run.a}-${run.b}</span><span>${escapeHtml(g.team==="a"?m.a:m.b)} · ${escapeHtml(label)}</span>
-        <button class="rm" data-rmgoal="${m.id}" data-idx="${i}">✕</button></div>`;
-    }).join("");
-
-    return `<div class="panel ${isManual ? '' : ''}" id="panel-${m.id}">
-        <div style="display:${isManual?'none':'block'}" id="goalsMode-${m.id}">
-          <div class="goal-add">
-            <span class="team-lbl">${escapeHtml(m.a)}</span>
-            <input type="text" id="scorerA-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
-            <label class="og"><input type="checkbox" id="ogA-${m.id}"> OG</label>
-            <button class="add" data-addgoal="${m.id}" data-team="a">+ ประตู</button>
-          </div>
-          <div class="goal-add">
-            <span class="team-lbl">${escapeHtml(m.b)}</span>
-            <input type="text" id="scorerB-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
-            <label class="og"><input type="checkbox" id="ogB-${m.id}"> OG</label>
-            <button class="add" data-addgoal="${m.id}" data-team="b">+ ประตู</button>
-          </div>
-          <div class="logged">${rows}</div>
-          <div class="panel-foot">
-            <button class="switch" data-switchmode="${m.id}" data-to="manual">ระบุแค่สกอร์ ไม่ใส่ชื่อ</button>
-            <button class="close" data-closepanel="${m.id}">เสร็จแล้ว</button>
-          </div>
-        </div>
-        <div style="display:${isManual?'block':'none'}" id="manualMode-${m.id}">
-          <div class="manual-row">
-            <input type="number" min="0" max="99" id="manA-${m.id}" value="${isManual ? rep.scoreA : ''}" placeholder="0">
-            <span style="color:var(--ink-dimmer)">–</span>
-            <input type="number" min="0" max="99" id="manB-${m.id}" value="${isManual ? rep.scoreB : ''}" placeholder="0">
-            <button class="save" data-savemanual="${m.id}">บันทึก</button>
-          </div>
-          <div class="panel-foot" style="border-top:none; margin-top:8px; padding-top:0;">
-            <button class="switch" data-switchmode="${m.id}" data-to="goals">ใส่ผู้ทำประตูทีละลูกแทน</button>
-            <button class="close" data-closepanel="${m.id}">เสร็จแล้ว</button>
-          </div>
-        </div>
-      </div>`;
+    return `<article class="match">
+      <div class="match-meta"><span class="grade-badge ${getMatchGrade(m)==='ม.ปลาย'?'senior':'junior'}">${getMatchGrade(m)}</span><span>${m.time||''}</span></div>
+      <div class="match-main">
+        <div class="match-team team-a ${aWin?'winner':bWin?'loser':''}">${escapeHtml(m.a)}</div>
+        <div class="match-score">${scoreHtml}</div>
+        <div class="match-team team-b ${bWin?'winner':aWin?'loser':''}">${escapeHtml(m.b)}</div>
+      </div>
+      ${goalLogHtml}
+    </article>`;
   }
 
   function renderDay(dayKey){
     const el = document.getElementById("day-" + dayKey);
     const items = MATCHES.filter(m => m.day === dayKey);
-    if(dayKey === "fri"){
-      const groups = ["ม.ต้น", "ม.ปลาย"];
-      el.innerHTML = groups.map(g => {
-        const rows = items.filter(m => getMatchGrade(m) === g).map(matchCard).join("");
-        return `<div class="group-label">${g}<span class="rule"></span></div>${rows}`;
-      }).join("");
-    } else {
-      el.innerHTML = items.map(matchCard).join("");
-    }
+    const groups = ["ม.ต้น", "ม.ปลาย"];
+    el.innerHTML = groups.map(g => {
+      const rows = items.filter(m => m.isBreak || getMatchGrade(m) === g).map(matchCard).join("");
+      if(!rows) return '';
+      const label = items.some(m => !m.isBreak && getMatchGrade(m) === g) ? `<div class="group-label">${g}<span class="rule"></span></div>` : '';
+      return label + rows;
+    }).join("");
   }
 
   function render(){
