@@ -1,23 +1,35 @@
-# DPSCUP 2026 — Final v29
+# DPSCUP Live — FINAL v30 NEXT
 
-ไฟล์ชุดรวมสำหรับ GitHub Pages
+ชุดนี้พัฒนาต่อจาก **DPSCUP Live v30** โดยไม่เปลี่ยน Firebase project/config และไม่แตะข้อมูลการแข่งขันเดิม
 
-## อัปโหลด/แทนที่ไฟล์
-- index.html
-- admin.html
-- summary.html
-- bracket.html
-- dpspn-logo.png
+## ไฟล์
+- `index.html` — หน้าหลัก + ผลการแข่งขัน + ดาวซัลโว + รายงานปัญหา
+- `admin.html` — ระบบแอดมิน
+- `summary.html` — สรุปผลและรางวัล
+- `bracket.html` — ผังการแข่งขัน
+- `dpspn-logo.png` — โลโก้
+- `firebase-rules.json` — Rules ที่แนะนำสำหรับ Firebase
 
-อย่าเปลี่ยน `firebase-config.js` ถ้าของเดิมเชื่อม Firebase dpscup-live อยู่แล้ว
+## โครงสร้างการแข่งขัน
+- ม.ต้น: 4 สาย A–D
+- ม.ปลาย: 4 ทีมพบกันหมด 6 นัด
+- ใช้ match ID ชุด `fri-4`, `sat-0b`, `sat-3`, `sat-6`, `sat-9`, `sat-12` เป็น ม.ปลาย
+- ไม่ใช้ `sat-15` แสดงผล
 
-## ไฟล์ซ้ำ
-ถ้ามี `index 3.html` หรือ `index 5.html` ไม่ต้องใช้ และลบออกจาก repo ได้เพื่อไม่ให้สับสน
+## จุดที่แก้ต่อจาก v30
+- ชื่อผู้ยิงอยู่ใต้ชื่อทีมของตัวเอง
+- ไม่มี goal log ซ้ำใต้การ์ด
+- ไม่ทำให้ชื่อทีมแพ้จางจนอ่านยาก
+- รวม `ฮานีฟ (โล้น)` เป็น `ฮานีฟ`
+- แก้ `คายรุนอานาม` เป็น `คอยรุนอานาม`
+- ดาวซัลโวแยก ม.ต้น / ม.ปลาย
+- หน้า Admin ไม่แสดงเครื่องมือจัดสาย ม.ปลาย เพราะ ม.ปลายเป็นรอบพบกันหมด
+- ตรวจ syntax JavaScript ของทุกหน้าแล้ว
 
-## Firebase Rules
-`firebase-rules.json` เป็นกติกาที่รองรับระบบนี้:
-- scores: คนดูอ่านได้ / เฉพาะผู้ล็อกอินเขียนได้
-- summary: คนดูอ่านได้ / เฉพาะผู้ล็อกอินเขียนได้
-- reports: คนดูส่งรายงานได้ / เฉพาะผู้ล็อกอินอ่านและจัดการรายงานได้
+## อัปขึ้น GitHub
+แทนที่ไฟล์เดิมชื่อเดียวกันใน repo:
+`index.html`, `admin.html`, `summary.html`, `bracket.html`, `dpspn-logo.png`
 
-ก่อนเปลี่ยน Rules ควร Export JSON จาก Realtime Database เพื่อสำรองข้อมูล
+**อย่าลบหรือเปลี่ยน `firebase-config.js`** ถ้าต้องการใช้ Firebase project และข้อมูลเดิม
+
+ลบไฟล์ซ้ำอย่าง `index 3.html` และ `index 5.html` ได้ โดยเก็บ `index.html` ไว้
