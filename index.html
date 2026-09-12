@@ -15,6 +15,90 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
 .match{padding:14px 18px 13px;border-radius:18px;background:#fff;border:1px solid #d8e5f5;box-shadow:0 10px 28px rgba(14,63,120,.06);margin:9px 0}.match-meta{display:flex;align-items:center;gap:8px;font-size:10px;color:#8aa0bb;margin-bottom:10px}.match-main{display:grid;grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);align-items:center;gap:12px}.match-team{display:flex;flex-direction:column;align-items:flex-start;min-width:0;font-size:15px;line-height:1.45;font-weight:600;color:#173b6d}.team-b{align-items:flex-end;text-align:right}.team-name{display:block;overflow-wrap:anywhere}.match-score{text-align:center}.m-score{font-family:'Chakra Petch';font-size:30px;font-weight:700;color:#062b67;white-space:nowrap}.m-score .dash{color:#9eb0c5;margin:0 7px}.m-score.tbd{font-family:'Prompt';font-size:11px;color:#91a3ba}.inline-scorers{display:flex;flex-direction:column;gap:2px;margin-top:5px;max-width:100%;font-size:11px;line-height:1.35;font-weight:500;color:#6680a3}.team-b .inline-scorers{align-items:flex-end;text-align:right}.inline-scorer{display:block;overflow-wrap:anywhere}.inline-scorer::before{content:'⚽';font-size:9px;margin-right:4px}.team-b .inline-scorer::before{margin-right:0;margin-left:4px}
 @media(max-width:720px){.wrap{padding:0 14px 30px}.nav-links{gap:10px;font-size:11px}.hero{padding:20px;border-radius:18px}.live-badge{position:static;display:inline-block;margin-top:12px}.title{font-size:48px}.summary-grid{grid-template-columns:1fr 1fr}.site-footer{grid-template-columns:1fr;text-align:center}.footer-brand{justify-content:center}.footer-social{justify-content:center}}
 @media(max-width:650px){.match-main{grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:8px}.match-team{font-size:13px}.m-score{font-size:26px}.inline-scorers{font-size:10px}.summary-card{padding:15px}.summary-card .summary-grid{grid-template-columns:1fr 1fr}.summary-card h3{font-size:16px}.summary-item{padding:9px 7px}.summary-item b{font-size:11px}}
+
+/* v30 NEXT — premium match card redesign */
+.match{
+  position:relative;
+  padding:15px 22px 18px;
+  margin:11px 0;
+  border:1px solid #d7e5f5;
+  border-radius:20px;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+  box-shadow:0 8px 24px rgba(20,67,120,.055);
+  overflow:hidden;
+}
+.match:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#1769e0,#79adff,#1769e0);opacity:.0;transition:.2s}
+.match:hover:before{opacity:1}
+.match-meta{
+  display:flex;align-items:center;gap:9px;
+  min-height:22px;margin-bottom:12px;
+  font-size:11px;color:#8aa0bb;font-weight:500;
+}
+.grade-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:49px;height:23px;padding:0 9px;
+  border-radius:999px;font-size:10px;font-weight:700;line-height:1;
+}
+.grade-badge.junior{background:#edf5ff;color:#1769e0;border:1px solid #cfe2fb}
+.grade-badge.senior{background:#f4edff;color:#7441d8;border:1px solid #dfd0ff}
+.match-main{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr);
+  align-items:center;gap:18px;
+  min-height:72px;
+}
+.match-team{
+  min-width:0;
+  display:flex;flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  font-size:18px;line-height:1.35;
+  font-weight:800;color:#082f68;
+  letter-spacing:-.01em;
+}
+.team-b{align-items:flex-end;text-align:right}
+.team-name{
+  display:block;width:100%;
+  color:#082f68 !important;
+  font-family:'Prompt',sans-serif;
+  font-size:18px;font-weight:800;
+  line-height:1.38;
+  overflow-wrap:anywhere;
+}
+.match-score{text-align:center;display:flex;align-items:center;justify-content:center;min-width:0}
+.m-score{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Chakra Petch',sans-serif;
+  font-size:38px;line-height:1;font-weight:700;
+  letter-spacing:-.035em;color:#062b67;white-space:nowrap;
+}
+.m-score .dash{color:#9fb2c9;margin:0 9px;font-weight:500}
+.m-score.tbd{font-family:'Prompt';font-size:12px;letter-spacing:0;color:#91a3ba}
+.inline-scorers{
+  display:flex;flex-direction:column;gap:3px;
+  width:100%;max-width:100%;margin-top:7px;
+  font-size:11px;line-height:1.4;font-weight:500;color:#7187a5;
+}
+.team-b .inline-scorers{align-items:flex-end;text-align:right}
+.inline-scorer{display:block;max-width:100%;overflow-wrap:anywhere}
+.inline-scorer::before{content:'⚽';font-size:9px;margin-right:5px;opacity:.9}
+.team-b .inline-scorer::before{margin-right:0;margin-left:5px}
+@media(max-width:720px){
+  .wrap{padding-left:14px;padding-right:14px}
+  .match{padding:13px 14px 16px;border-radius:17px}
+  .match-main{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr);gap:10px;min-height:66px}
+  .team-name{font-size:15px}
+  .match-team{font-size:15px}
+  .m-score{font-size:30px}
+  .m-score .dash{margin:0 6px}
+  .inline-scorers{font-size:10px;margin-top:5px}
+}
+@media(max-width:430px){
+  .match-main{grid-template-columns:minmax(0,1fr) 68px minmax(0,1fr);gap:7px}
+  .team-name{font-size:13px}
+  .m-score{font-size:25px}
+  .inline-scorers{font-size:9px}
+}
 </style>
 \n<body>\n<div class="wrap" id="top">
 <nav class="top-nav"><a class="nav-brand" href="#top"><img src="dpspn-logo.png" alt="DPSPN"><span>DPSCUP <small>2026</small></span></a><div class="nav-links"><a href="#matches">ผลการแข่งขัน</a><a href="#stats">ดาวซัลโว</a><a href="summary.html">สรุปผล</a><a href="bracket.html">ผังการแข่งขัน</a><a href="#issueOpen">รายงานปัญหา</a></div></nav>
