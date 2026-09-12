@@ -13,6 +13,8 @@
 .admin-section-hidden{display:none!important}.senior-empty{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 20px;text-align:center;box-shadow:var(--shadow);margin:14px 0}.senior-empty-icon{font-size:30px}.senior-empty h2{font-family:'Chakra Petch';margin:7px 0;color:var(--navy)}.senior-empty p{font-size:12px;color:var(--muted);margin:5px 0}.senior-empty button{margin-top:12px;border:0;background:var(--blue);color:#fff;border-radius:10px;padding:10px 14px;font:700 12px Prompt}
 .hero{position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-70px;top:-80px;background:radial-gradient(circle,rgba(23,105,224,.14),transparent 68%);pointer-events:none}.toolbar button{min-height:42px}.match{transition:transform .15s ease,box-shadow .15s ease}.match:focus-within{box-shadow:0 10px 25px rgba(23,105,224,.11);border-color:#b9d2f2}.manual-row .save{min-height:40px}.goal-add button.add{min-height:40px}.report-row{background:#fff}.reports-panel{border-color:#d7e5f5}.reports-panel .reports-head{background:linear-gradient(90deg,#fff,#f5f9ff)}
 @media(max-width:700px){.admin-modebar{align-items:flex-start;flex-direction:column}.admin-grade-tabs{width:100%}.admin-grade-tabs button{flex:1}.admin-nav{grid-template-columns:repeat(2,1fr)}.admin-nav button{min-height:42px}.hero{padding:18px}.title{font-size:38px}.days{margin-top:10px}}
+
+.grade-badge{display:inline-block;margin-bottom:4px;padding:2px 7px;border-radius:999px;font:700 9px/1.2 Prompt,sans-serif;letter-spacing:.1px;border:1px solid #cfe0f5;background:#eef6ff;color:#1769e0;white-space:nowrap}.grade-badge.senior{background:#f3edff;border-color:#dfccff;color:#7b3fe4}.grade-badge.junior{background:#eef6ff;border-color:#cfe0f5;color:#1769e0}.m-time{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px}
 </style>
 <body><div id="adminGate"><div id="adminBox"><h2>🔐 เข้าสู่ระบบผู้ดูแล</h2><div style="color:#7185a3;font-size:12px;line-height:1.6;margin-top:6px">เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น</div><input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username"><input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"><button id="adminEnter">เข้าสู่ระบบ</button><div id="adminErr"></div></div></div><div class="wrap"><header class="hero"><div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div><h1 class="title">DPSCUP <span class="no">ADMIN</span></h1><div class="eyebrow">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">🔐 แอดมินเท่านั้น</div><div class="toolbar"><button class="primary" id="printBtn">🖨️ พิมพ์ / บันทึก PDF</button><button id="logoutBtn">ออกจากระบบ</button></div><div class="next-line" id="nextLine"><span class="dot"></span><span id="nextText">กำลังโหลด…</span></div></header>
 <div class="admin-modebar">
@@ -73,6 +75,10 @@
     {id:"sun-2", day:"sun", group:"ม.ต้น", start:"2026-09-13T08:50:00+07:00", end:"2026-09-13T09:10:00+07:00", time:"08:50", a:"VORTEX", b:"TSP รุ่นที่ 4 ACADEMY 1"},
     {id:"sun-3", day:"sun", group:"ม.ต้น", start:"2026-09-13T09:10:00+07:00", end:"2026-09-13T09:30:00+07:00", time:"09:10", a:"ลุงโชเล่ X ปูดอง", b:"น้องใหม่ X Q-CHANGE"},
   ];
+
+  // รุ่นการแข่งขัน: ทีม 4 ชุดนี้เป็น ม.ปลายตามรายชื่อที่เหลือจากผัง ม.ต้น
+  const SENIOR_TEAMS = new Set(['ไม่ได้แชมป์ ไม่ขึ้นมัสยิด','วัยรุ่นสายฮา X ทีเด็ด','Dewan G.20','วัยรุ่นสายฮา X ซีเครท']);
+  function getMatchGrade(m){ return (SENIOR_TEAMS.has(m.a) || SENIOR_TEAMS.has(m.b)) ? 'ม.ปลาย' : 'ม.ต้น'; }
 
   const STORAGE_KEY = "dpscup-2-scores";
   const REPORTS_KEY = "dpscup-2-reports";
@@ -235,7 +241,7 @@
     return `
       <div class="match">
         <div class="m-row">
-          <div class="m-time">${m.time || ""}</div>
+          <div class="m-time"><span class="grade-badge ${getMatchGrade(m)==="ม.ปลาย"?"senior":"junior"}">${getMatchGrade(m)}</span>${m.time || ""}</div>
           <div class="m-teams">
             <div class="m-names">
               <div class="m-name ${aWin?'win':bWin?'lose':''}">${escapeHtml(m.a)}</div>
@@ -299,7 +305,7 @@
   function renderAdminStats(){
     const map=new Map(); let played=0,totalGoals=0;
     MATCHES.forEach(m=>{if(m.isBreak)return; const r=currentResult(m); if(!r)return; played++;
-      if(r.mode==='goals'){ const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]); gs.forEach(g=>{if(g.og)return; if(g.scorer){const scorerName=normalizeScorerName(g.scorer); if(!scorerName) return; const key=scorerName+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:scorerName,team:g.team==='a'?m.a:m.b,goals:0}; x.goals++;map.set(key,x);totalGoals++;}}); }
+      if(r.mode==='goals'){ const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]); gs.forEach(g=>{if(g.og)return; if(g.scorer){const scorerName=normalizeScorerName(g.scorer); if(!scorerName) return; const key=scorerName+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:scorerName,team:g.team==='a'?m.a:m.b,group:getMatchGrade(m),goals:0}; x.goals++;map.set(key,x);totalGoals++;}}); }
       else totalGoals+=Number(r.a||0)+Number(r.b||0);
     });
     const e=id=>document.getElementById(id); if(e('aStatMatches'))e('aStatMatches').textContent=MATCHES.filter(m=>!m.isBreak).length; if(e('aStatPlayed'))e('aStatPlayed').textContent=played; if(e('aStatGoals'))e('aStatGoals').textContent=totalGoals;
@@ -313,7 +319,7 @@
     if(dayKey === "fri"){
       const groups = ["ม.ต้น", "ม.ปลาย"];
       el.innerHTML = groups.map(g => {
-        const rows = items.filter(m => m.group === g).map(matchCard).join("");
+        const rows = items.filter(m => getMatchGrade(m) === g).map(matchCard).join("");
         return `<div class="group-label">${g}<span class="rule"></span></div>${rows}`;
       }).join("");
     } else {
@@ -455,7 +461,7 @@
 
   function buildPrintReport(){
     const scorerMap=new Map();
-    MATCHES.forEach(m=>{if(m.isBreak)return;const r=currentResult(m);if(!r||r.mode!=="goals")return;const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]);gs.forEach(g=>{if(g.og||!g.scorer)return;const scorerName=normalizeScorerName(g.scorer); if(!scorerName)return;const key=scorerName+'||'+(g.team==='a'?m.a:m.b);const x=scorerMap.get(key)||{name:scorerName,team:g.team==='a'?m.a:m.b,goals:0};x.goals++;scorerMap.set(key,x);});});
+    MATCHES.forEach(m=>{if(m.isBreak)return;const r=currentResult(m);if(!r||r.mode!=="goals")return;const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]);gs.forEach(g=>{if(g.og||!g.scorer)return;const scorerName=normalizeScorerName(g.scorer); if(!scorerName)return;const key=scorerName+'||'+(g.team==='a'?m.a:m.b);const x=scorerMap.get(key)||{name:scorerName,team:g.team==='a'?m.a:m.b,group:getMatchGrade(m),goals:0};x.goals++;scorerMap.set(key,x);});});
     const scorers=Array.from(scorerMap.values()).sort((a,b)=>b.goals-a.goals).slice(0,10);
     let html = `<div class="pr-day"><div class="pr-title">DPSCUP ครั้งที่ 2 — รายงานผลการแข่งขัน</div><div class="pr-group">🏆 สรุปผลการแข่งขัน — ม.ต้น</div><div class="pr-goal"><b>🥇 แชมป์:</b> ${escapeHtml(document.getElementById("sumChampionMinor")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>🥈 รองแชมป์:</b> ${escapeHtml(document.getElementById("sumRunnerMinor")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>🥉 อันดับ 3:</b> ${escapeHtml(document.getElementById("sumThirdMinor")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>⭐ นักเตะยอดเยี่ยม:</b> ${escapeHtml(document.getElementById("sumBestPlayerMinor")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>🧤 ผู้รักษาประตูยอดเยี่ยม:</b> ${escapeHtml(document.getElementById("sumBestGoalkeeperMinor")?.value||"ยังไม่ประกาศ")}</div><div class="pr-group">🏆 สรุปผลการแข่งขัน — ม.ปลาย</div><div class="pr-goal"><b>🥇 แชมป์:</b> ${escapeHtml(document.getElementById("sumChampionSenior")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>🥈 รองแชมป์:</b> ${escapeHtml(document.getElementById("sumRunnerSenior")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>🥉 อันดับ 3:</b> ${escapeHtml(document.getElementById("sumThirdSenior")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>⭐ นักเตะยอดเยี่ยม:</b> ${escapeHtml(document.getElementById("sumBestPlayerSenior")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>🧤 ผู้รักษาประตูยอดเยี่ยม:</b> ${escapeHtml(document.getElementById("sumBestGoalkeeperSenior")?.value||"ยังไม่ประกาศ")}</div><div class="pr-group">👑 TOP SCORERS</div><div class="pr-venue">11–13 กันยายน 2569 · สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>`;
     if(scorers.length) scorers.forEach((r,i)=>html+=`<div class="pr-goal"><b>${i+1}. ${escapeHtml(r.name)}</b> — ${escapeHtml(r.team)} · <b>${r.goals} ประตู</b></div>`); else html+='<div class="pr-pending">ยังไม่มีข้อมูลผู้ทำประตู</div>';
@@ -467,9 +473,9 @@
       let lastGroup = null;
       items.forEach(m=>{
         if(m.isBreak){ html += `<div class="pr-break">— ${m.label} · ${m.time} —</div>`; return; }
-        if(dayKey==="fri" && m.group !== lastGroup){
-          lastGroup = m.group;
-          html += `<div class="pr-group">${escapeHtml(m.group)}</div>`;
+        if(dayKey==="fri" && getMatchGrade(m) !== lastGroup){
+          lastGroup = getMatchGrade(m);
+          html += `<div class="pr-group">${escapeHtml(getMatchGrade(m))}</div>`;
         }
         gameNo++;
         const res = currentResult(m);
