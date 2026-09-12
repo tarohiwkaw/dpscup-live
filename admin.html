@@ -212,6 +212,16 @@
   .admin-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:rgba(225,82,82,.13);border:1px solid rgba(225,82,82,.35);color:#ff8d8d;font-size:10px;font-weight:600;margin-top:8px}
   .admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:13px}.admin-stat{padding:9px 7px;text-align:center;background:rgba(18,38,65,.8);border:1px solid var(--line);border-radius:10px}.admin-stat b{display:block;font-family:'Chakra Petch';font-size:18px}.admin-stat span{font-size:9px;color:var(--ink-dim)}
   .top-admin{margin:14px 0 6px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:rgba(10,21,34,.5)}.top-admin-title{padding:8px 10px;font-size:11px;font-weight:600;color:var(--amber);border-bottom:1px solid var(--line)}.top-admin-row{display:grid;grid-template-columns:25px 1fr auto;gap:7px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:11px}.top-admin-row:last-child{border-bottom:0}.top-admin-row small{display:block;color:var(--ink-dim);font-size:9px}.top-admin-row b{font-family:'Chakra Petch';font-size:16px}
+
+  .reports-panel{margin:16px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(10,21,34,.65)}
+  .reports-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .reports-head h2{margin:0;font-size:15px}.reports-count{min-width:24px;padding:3px 7px;border-radius:999px;background:rgba(225,82,82,.18);color:#ff9b9b;text-align:center;font-size:11px}
+  .report-add{border:1px solid var(--line-strong);background:var(--amber);color:#111;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer}
+  .report-row{padding:12px 14px;border-bottom:1px solid var(--line);display:grid;gap:6px}.report-row:last-child{border-bottom:0}
+  .report-meta{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--ink-dim)}.report-type{font-weight:700;color:var(--ink)}
+  .report-detail{font-size:12px;line-height:1.55;white-space:pre-wrap}.report-actions{display:flex;gap:7px;flex-wrap:wrap}.report-actions button{border:1px solid var(--line-strong);background:transparent;color:var(--ink);border-radius:7px;padding:6px 9px;font-size:10px;cursor:pointer}.report-actions .done{background:rgba(48,190,126,.12);border-color:rgba(48,190,126,.35)}.report-actions .danger{background:rgba(225,82,82,.1);border-color:rgba(225,82,82,.35);color:#ff9b9b}
+  .report-status-done{opacity:.58}.report-status-done .report-type{text-decoration:line-through}
+  .admin-report-modal{position:fixed;inset:0;z-index:120;background:rgba(2,10,18,.78);display:none;align-items:center;justify-content:center;padding:16px}.admin-report-modal.show{display:flex}.admin-report-box{width:min(520px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;padding:16px;box-shadow:0 20px 70px rgba(0,0,0,.45)}.admin-report-box h3{margin:0 0 12px}.admin-report-box input,.admin-report-box select,.admin-report-box textarea{width:100%;box-sizing:border-box;background:var(--bg);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin:5px 0 10px;font-size:16px}.admin-report-box textarea{min-height:120px;resize:vertical}.admin-report-box label{font-size:11px;color:var(--ink-dim)}.admin-report-actions{display:flex;gap:8px}.admin-report-actions button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line-strong);cursor:pointer}.admin-report-actions .save{background:var(--amber);font-weight:700}
 </style>
 </head>
 <body>
@@ -254,6 +264,11 @@
   </nav>
 
   <div class="top-admin" id="topAdmin"><div class="top-admin-title">👑 TOP SCORERS · จากข้อมูลที่บันทึกแล้ว</div></div>
+  <section class="reports-panel" id="reportsPanel">
+    <div class="reports-head"><h2>🛠️ รายงานปัญหาจากผู้ชม <span class="reports-count" id="reportsCount">0</span></h2><button class="report-add" id="adminReportAdd">＋ เพิ่มรายงาน</button></div>
+    <div id="reportsList"><div style="padding:14px;color:var(--ink-dim);font-size:11px">กำลังโหลดรายงาน…</div></div>
+  </section>
+
   <section class="day" id="day-fri"></section>
   <section class="day" id="day-sat"></section>
   <section class="day" id="day-sun"></section>
@@ -265,6 +280,16 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="admin-report-modal" id="adminReportModal">
+  <div class="admin-report-box">
+    <h3>🛠️ เพิ่มรายงานปัญหา</h3>
+    <label>ชื่อผู้แจ้ง<input id="adminReportName" placeholder="เช่น ทีมงาน / ผู้ชม"></label>
+    <label>ประเภท<select id="adminReportType"><option>⚽ สกอร์ผิด</option><option>👤 ชื่อผู้ทำประตูผิด</option><option>📱 การแสดงผลผิดปกติ</option><option>🐛 เว็บไซต์มีปัญหา</option><option>📣 อื่น ๆ</option></select></label>
+    <label>รายละเอียด<textarea id="adminReportDetail" placeholder="รายละเอียดปัญหา..."></textarea></label>
+    <div class="admin-report-actions"><button id="adminReportCancel">ยกเลิก</button><button class="save" id="adminReportSave">บันทึกรายงาน</button></div>
+  </div>
+</div>
 <div id="printReport"></div>
 
 <script>
@@ -310,6 +335,7 @@
   ];
 
   const STORAGE_KEY = "dpscup-2-scores";
+  const REPORTS_KEY = "dpscup-2-reports";
   let reported = {}; // { [id]: {mode:'goals', goals:[{team,scorer,og}]} | {mode:'manual', scoreA, scoreB} }
 
   // ---------- Realtime cloud storage ----------
@@ -828,6 +854,57 @@
 
   const logoutBtn = document.getElementById("logoutBtn");
   if(logoutBtn) logoutBtn.onclick = () => firebase.auth().signOut();
+
+  // ---------- Admin issue reports ----------
+  let reportsRef = null;
+  function escReport(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+  function fmtReportTime(ts){
+    if(!ts) return 'เพิ่งส่ง';
+    try{return new Intl.DateTimeFormat('th-TH',{dateStyle:'medium',timeStyle:'short'}).format(new Date(ts));}catch(e){return new Date(ts).toLocaleString();}
+  }
+  function renderReports(snap){
+    const raw=snap.val()||{};
+    const arr=Object.entries(raw).map(([id,r])=>({id,...r})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    document.getElementById('reportsCount').textContent=arr.filter(r=>r.status!=='done').length;
+    const list=document.getElementById('reportsList');
+    if(!arr.length){list.innerHTML='<div style="padding:14px;color:var(--ink-dim);font-size:11px">ยังไม่มีรายงานปัญหา 🎉</div>';return;}
+    list.innerHTML=arr.map(r=>`<div class="report-row ${r.status==='done'?'report-status-done':''}">
+      <div class="report-meta"><span>${escReport(fmtReportTime(r.createdAt))}</span><span>${r.status==='done'?'✅ แก้ไขแล้ว':'🔴 รอดำเนินการ'}</span></div>
+      <div class="report-type">${escReport(r.type||'📣 อื่น ๆ')} · ${escReport(r.name||'ไม่ระบุชื่อ')}</div>
+      <div class="report-detail">${escReport(r.detail||'ไม่ได้ระบุรายละเอียด')}</div>
+      <div class="report-actions">${r.status==='done'?`<button data-report-action="reopen" data-report-id="${r.id}">↩️ เปิดอีกครั้ง</button>`:`<button class="done" data-report-action="done" data-report-id="${r.id}">✅ ทำเครื่องหมายแก้แล้ว</button>`}<button data-report-action="copy" data-report-id="${r.id}">📋 คัดลอก</button><button class="danger" data-report-action="delete" data-report-id="${r.id}">🗑️ ลบ</button></div>
+    </div>`).join('');
+  }
+  function initReports(){
+    try{
+      if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){
+        reportsRef=firebase.database().ref(REPORTS_KEY);
+        reportsRef.on('value',renderReports,err=>{console.error(err);document.getElementById('reportsList').innerHTML='<div style="padding:14px;color:#ff9b9b;font-size:11px">อ่านรายงานไม่ได้ · ตรวจ Firebase Rules</div>';});
+      }
+    }catch(e){console.error(e);}
+  }
+  document.getElementById('reportsList')?.addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-report-action]'); if(!b||!reportsRef)return;
+    const id=b.dataset.reportId, action=b.dataset.reportAction;
+    try{
+      const snap=await reportsRef.child(id).once('value'); const r=snap.val()||{};
+      if(action==='done'||action==='reopen') await reportsRef.child(id).update({status:action==='done'?'done':'new',updatedAt:firebase.database.ServerValue.TIMESTAMP});
+      else if(action==='delete' && confirm('ลบรายงานนี้หรือไม่?')) await reportsRef.child(id).remove();
+      else if(action==='copy'){const text=`DPSCUP — รายงานปัญหา\nผู้แจ้ง: ${r.name||'ไม่ระบุชื่อ'}\nประเภท: ${r.type||'-'}\nรายละเอียด: ${r.detail||'-'}\nหน้าเว็บ: ${r.page||'-'}`; try{await navigator.clipboard.writeText(text);showToast('คัดลอกรายงานแล้ว')}catch(_){window.prompt('คัดลอกรายงาน:',text)}}
+    }catch(err){console.error(err);showToast('ดำเนินการไม่สำเร็จ');}
+  });
+  const arm=document.getElementById('adminReportModal');
+  document.getElementById('adminReportAdd')?.addEventListener('click',()=>arm?.classList.add('show'));
+  document.getElementById('adminReportCancel')?.addEventListener('click',()=>arm?.classList.remove('show'));
+  arm?.addEventListener('click',e=>{if(e.target===arm)arm.classList.remove('show')});
+  document.getElementById('adminReportSave')?.addEventListener('click',async()=>{
+    if(!reportsRef){showToast('Firebase ยังไม่พร้อม');return;}
+    const detail=(document.getElementById('adminReportDetail').value||'').trim();
+    if(!detail){showToast('กรอกรายละเอียดก่อน');return;}
+    const p={name:(document.getElementById('adminReportName').value||'ทีมงานแอดมิน').trim().slice(0,80),type:document.getElementById('adminReportType').value,detail:detail.slice(0,1000),page:location.href,createdAt:firebase.database.ServerValue.TIMESTAMP,status:'new',createdBy:'admin'};
+    try{await reportsRef.push(p);document.getElementById('adminReportName').value='';document.getElementById('adminReportDetail').value='';arm?.classList.remove('show');showToast('เพิ่มรายงานแล้ว');}catch(e){console.error(e);showToast('เพิ่มรายงานไม่สำเร็จ');}
+  });
+  initReports();
   btn.onclick = login;
   password.addEventListener("keydown", e => { if(e.key==="Enter") login(); });
 })();

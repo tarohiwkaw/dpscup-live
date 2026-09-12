@@ -156,7 +156,7 @@
 
   /* ---------- Logo / accordion / issue report ---------- */
   .brand-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-  .brand-logo{width:54px;height:54px;border-radius:14px;object-fit:cover;background:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .brand-logo{width:62px;height:62px;border-radius:50%;object-fit:cover;background:#fff;border:2px solid rgba(73,154,255,.65);box-shadow:0 0 0 4px rgba(73,154,255,.08),0 8px 28px rgba(0,0,0,.35)}
   .brand-copy{min-width:0}.brand-copy strong{display:block;font-family:'Chakra Petch';font-size:18px;letter-spacing:.04em}.brand-copy span{display:block;font-size:10px;color:var(--ink-dim);margin-top:2px}
   .accordion{border:1px solid rgba(73,154,255,.28);border-radius:14px;overflow:hidden;background:linear-gradient(145deg,#10243c,#0c1b2b);box-shadow:0 10px 30px rgba(0,0,0,.18)}
   .accordion summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:13px;background:linear-gradient(90deg,rgba(24,103,209,.20),transparent)}
@@ -218,7 +218,7 @@
 <div class="wrap">
   <header class="hero">
     <div class="brand-top">
-      <img class="brand-logo" src="dpspn-logo.jpg" alt="DPSPN logo">
+      <img class="brand-logo" src="dpspn-logo.png" alt="DPSPN logo">
       <div class="brand-copy"><strong>DPSPN</strong><span>Dewan Pelajar Sekolah Piraya Nawin · GENERASI 20</span></div>
     </div>
     <div class="eyebrow">DPSPN · การแข่งขันฟุตบอลภายในโรงเรียน 26/27</div>
@@ -280,7 +280,7 @@
       <label>ชื่อผู้แจ้ง (ไม่กรอกก็ได้)<input id="issueName" placeholder="ชื่อเล่น / ชื่อผู้แจ้ง"></label>
       <label>ประเภทปัญหา<select id="issueType"><option>⚽ สกอร์ผิด</option><option>👤 ชื่อผู้ทำประตูผิด</option><option>📱 การแสดงผลผิดปกติ</option><option>🐛 เว็บไซต์มีปัญหา</option><option>📣 อื่น ๆ</option></select></label>
       <label>รายละเอียด<textarea id="issueDetail" placeholder="เช่น เกมที่ 3 สกอร์ควรเป็น 2–1 หรือชื่อผู้ยิงสะกดผิด..."></textarea></label>
-      <div class="issue-actions"><button id="issueCopy">📋 คัดลอกรายงาน</button><button class="send" id="issueFacebook">📘 เปิด Facebook</button></div>
+      <div class="issue-actions"><button class="send" id="issueSend">📨 ส่งให้แอดมิน</button><button id="issueCopy">📋 คัดลอกรายงาน</button><button class="send" id="issueFacebook">📘 เปิด Facebook</button></div>
       <a class="quick-link" href="https://www.instagram.com/dewanpiraya.official/" target="_blank" rel="noopener">📸 เปิด Instagram เพื่อแจ้งปัญหา</a>
       <div style="font-size:10px;color:var(--ink-dimmer);line-height:1.6">ระบบจะเตรียมข้อความรายงานให้ก่อน จากนั้นกดคัดลอกแล้วส่งให้ทีมงานผ่าน Facebook หรือ Instagram</div>
     </div>
@@ -332,6 +332,7 @@
   ];
 
   const STORAGE_KEY = "dpscup-2-scores";
+  const REPORTS_KEY = "dpscup-2-reports";
   let reported = {}; // { [id]: {mode:'goals', goals:[{team,scorer,og}]} | {mode:'manual', scoreA, scoreB} }
 
   // ---------- Realtime cloud storage ----------
@@ -667,27 +668,50 @@
   const issueModal=document.getElementById('issueModal');
   const issueOpen=document.getElementById('issueOpen');
   const issueClose=document.getElementById('issueClose');
-  function issueText(){
+  function issuePayload(){
     const name=(document.getElementById('issueName').value||'ไม่ระบุชื่อ').trim();
     const type=document.getElementById('issueType').value;
     const detail=(document.getElementById('issueDetail').value||'').trim();
-    return `DPSCUP — รายงานปัญหา\nผู้แจ้ง: ${name}\nประเภท: ${type}\nรายละเอียด: ${detail||'ไม่ได้ระบุ'}\nหน้าเว็บ: ${location.href}`;
+    return {name:name.slice(0,80),type:type.slice(0,80),detail:detail.slice(0,1000),page:location.href,createdAt:firebase.database.ServerValue.TIMESTAMP,status:'new'};
+  }
+  function issueText(p){
+    return `DPSCUP — รายงานปัญหา\nผู้แจ้ง: ${p.name||'ไม่ระบุชื่อ'}\nประเภท: ${p.type||'-'}\nรายละเอียด: ${p.detail||'ไม่ได้ระบุ'}\nหน้าเว็บ: ${p.page||location.href}`;
   }
   issueOpen?.addEventListener('click',()=>issueModal?.classList.add('show'));
   issueClose?.addEventListener('click',()=>issueModal?.classList.remove('show'));
   issueModal?.addEventListener('click',e=>{if(e.target===issueModal) issueModal.classList.remove('show');});
+
+  document.getElementById('issueSend')?.addEventListener('click',async()=>{
+    const btn=document.getElementById('issueSend');
+    const p=issuePayload();
+    if(!p.detail){showToast('กรอกรายละเอียดปัญหาก่อนส่ง'); return;}
+    btn.disabled=true; btn.textContent='กำลังส่ง…';
+    try{
+      if(!(window.DPSCUP_FIREBASE_CONFIG && window.firebase)) throw new Error('Firebase unavailable');
+      const ref=firebase.database().ref(REPORTS_KEY).push();
+      await ref.set(p);
+      showToast('ส่งรายงานถึงแอดมินแล้ว ✓');
+      document.getElementById('issueName').value='';
+      document.getElementById('issueDetail').value='';
+      issueModal?.classList.remove('show');
+    }catch(e){
+      console.error(e);
+      showToast('ส่งรายงานไม่สำเร็จ · ลองใหม่อีกครั้ง');
+    }finally{
+      btn.disabled=false; btn.textContent='📨 ส่งให้แอดมิน';
+    }
+  });
   document.getElementById('issueCopy')?.addEventListener('click',async()=>{
-    const text=issueText();
-    try{await navigator.clipboard.writeText(text);showToast('คัดลอกรายงานแล้ว · นำไปส่งให้ทีมงานได้เลย');}
+    const p=issuePayload();
+    const text=issueText(p);
+    try{await navigator.clipboard.writeText(text);showToast('คัดลอกรายงานแล้ว');}
     catch(e){window.prompt('คัดลอกรายงานนี้:',text);}
   });
   document.getElementById('issueFacebook')?.addEventListener('click',async()=>{
-    const text=issueText();
-    try{await navigator.clipboard.writeText(text);showToast('คัดลอกรายงานแล้ว · กำลังเปิด Facebook');}
-    catch(e){}
+    const p=issuePayload();
+    try{await navigator.clipboard.writeText(issueText(p));showToast('คัดลอกรายงานแล้ว · กำลังเปิด Facebook');}catch(e){}
     window.open('https://www.facebook.com/profile.php?id=61556339787704','_blank','noopener');
   });
-
   // ---------- Init ----------
   function pickInitialDay(){
     const now = new Date();
