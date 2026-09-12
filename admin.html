@@ -1,297 +1,12 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DPSCUP ครั้งที่ 2 — ผู้ดูแลสกอร์</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="firebase-config.js"></script>
-<style>
-  :root{
-    --bg:#0A1522;
-    --panel:#122641;
-    --panel-2:#16304F;
-    --line: rgba(226,236,248,0.09);
-    --line-strong: rgba(226,236,248,0.18);
-    --ink:#E9F1FA;
-    --ink-dim:#8FA4BF;
-    --ink-dimmer:#5E7896;
-    --amber:#F5A623;
-    --amber-dim: rgba(245,166,35,0.15);
-    --turf:#39B26B;
-    --turf-dim: rgba(57,178,107,0.16);
-    --red:#E15252;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0; padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Prompt', system-ui, sans-serif;
-    min-height:100vh;
-    padding-bottom:60px;
-  }
-  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important;} }
-  .wrap{ max-width:600px; margin:0 auto; padding:0 16px; }
-
-  /* ---------- Hero (simplified) ---------- */
-  header.hero{ padding:26px 0 16px; border-bottom:1px solid var(--line); }
-  .eyebrow{ font-size:12px; color:var(--ink-dim); }
-  h1.title{
-    font-family:'Chakra Petch', sans-serif; font-weight:700;
-    font-size:clamp(32px, 10vw, 44px); line-height:0.95; margin:6px 0 8px; letter-spacing:-0.01em;
-  }
-  h1.title .no{ color:var(--amber); }
-
-  .toolbar{ display:flex; gap:8px; margin-top:14px; }
-  .toolbar button{
-    font-family:'Prompt', sans-serif; font-size:13px; font-weight:500;
-    border-radius:9px; padding:9px 14px; cursor:pointer; border:1px solid var(--line-strong);
-    background:var(--panel); color:var(--ink);
-    display:flex; align-items:center; gap:6px;
-  }
-  .toolbar button svg{ width:15px; height:15px; }
-  .toolbar button.primary{ background:var(--amber-dim); color:var(--amber); border-color:rgba(245,166,35,0.45); }
-
-  .next-line{
-    margin-top:14px; display:flex; align-items:center; gap:9px;
-    font-size:13px; color:var(--ink-dim);
-  }
-  .next-line .dot{ width:7px; height:7px; border-radius:50%; background:var(--turf); flex-shrink:0; }
-  .next-line.is-live .dot{ background:var(--red); animation:pulse 1.6s ease-in-out infinite; }
-  @keyframes pulse{ 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.6);opacity:0.55;} }
-  .next-line b{ color:var(--ink); font-weight:500; }
-
-  /* ---------- Day tabs ---------- */
-  nav.days{
-    position:sticky; top:0; z-index:20; display:flex; gap:6px;
-    padding:14px 0 12px; background:linear-gradient(180deg, var(--bg) 80%, transparent);
-  }
-  nav.days button{
-    flex:1; font-family:'Prompt', sans-serif; font-size:13px; font-weight:500; color:var(--ink-dim);
-    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:9px 6px;
-    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
-  }
-  nav.days button .sub{ font-size:10px; color:var(--ink-dimmer); }
-  nav.days button.active{ background:var(--amber-dim); border-color:rgba(245,166,35,0.5); color:var(--amber); }
-  nav.days button.active .sub{ color:rgba(245,166,35,0.75); }
-  nav.days button .todaymark{ display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--turf); margin-left:4px; }
-
-  section.day{ display:none; }
-  section.day.active{ display:block; }
-
-  .group-label{ display:flex; align-items:baseline; gap:8px; margin:20px 2px 8px; color:var(--ink-dim); font-size:12.5px; }
-  .group-label .rule{ flex:1; height:1px; background:var(--line); }
-  .group-label:first-child{ margin-top:4px; }
-  .break-row{ text-align:center; font-size:12px; color:var(--ink-dimmer); padding:12px 0; }
-
-  /* ---------- Match card ---------- */
-  .match{ border-bottom:1px solid var(--line); padding:13px 2px; }
-  .m-row{ display:flex; align-items:center; gap:10px; }
-  .m-time{ font-family:'Chakra Petch', sans-serif; font-size:12px; color:var(--ink-dimmer); width:38px; flex-shrink:0; }
-  .m-teams{ flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  .m-names{ min-width:0; }
-  .m-name{ font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
-  .m-name.win{ font-weight:600; }
-  .m-name.lose{ color:var(--ink-dimmer); }
-  .m-score{ font-family:'Chakra Petch', sans-serif; font-weight:700; font-size:17px; white-space:nowrap; flex-shrink:0; }
-  .m-score .dash{ color:var(--ink-dimmer); margin:0 3px; font-weight:400; }
-  .m-score.tbd{ font-size:13px; font-weight:500; color:var(--ink-dimmer); }
-
-  .goal-log{ margin:8px 0 0 48px; font-size:12px; color:var(--ink-dim); line-height:1.9; }
-  .goal-log .g-final{ color:var(--ink); font-weight:600; text-decoration:underline; text-underline-offset:3px; }
-
-  .m-action{ margin:8px 0 0 48px; }
-  .m-action button{
-    font-family:'Prompt', sans-serif; font-size:12.5px; color:var(--amber); background:none; border:none;
-    padding:0; cursor:pointer;
-  }
-
-  /* ---------- Report panel ---------- */
-  .panel{ display:none; margin:10px 0 2px 48px; background:var(--panel); border:1px solid var(--line-strong); border-radius:11px; padding:12px; }
-  .panel.open{ display:block; }
-  .goal-add{ display:flex; align-items:center; gap:7px; margin-bottom:8px; }
-  .goal-add .team-lbl{ font-size:12px; color:var(--ink-dim); width:88px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .goal-add input[type="text"]{
-    flex:1; background:var(--bg); border:1px solid var(--line-strong); border-radius:7px;
-    color:var(--ink); font-family:'Prompt',sans-serif; font-size:16px; padding:8px 9px;
-  }
-  .goal-add input::placeholder{ color:var(--ink-dimmer); }
-  .goal-add label.og{ font-size:10.5px; color:var(--ink-dimmer); display:flex; align-items:center; gap:3px; flex-shrink:0; white-space:nowrap; }
-  .goal-add button.add{
-    background:var(--turf-dim); color:var(--turf); border:none; border-radius:7px; padding:8px 10px;
-    font-size:12px; font-weight:600; cursor:pointer; flex-shrink:0;
-  }
-  .logged{ margin:6px 0 4px; }
-  .logged-row{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-dim); padding:4px 0; }
-  .logged-row .sc{ font-family:'Chakra Petch',sans-serif; color:var(--ink); font-weight:600; width:34px; flex-shrink:0; }
-  .logged-row .rm{ margin-left:auto; background:none; border:none; color:var(--ink-dimmer); cursor:pointer; font-size:14px; padding:2px 6px; }
-  .panel-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
-  .panel-foot .switch{ font-size:11.5px; color:var(--ink-dimmer); background:none; border:none; cursor:pointer; text-decoration:underline; }
-  .panel-foot .close{ font-size:12.5px; color:var(--amber); background:none; border:none; cursor:pointer; font-weight:500; }
-
-  .editor-title{ font-weight:700; margin-bottom:8px; }
-  .scorer-section{ margin-top:12px; padding-top:11px; border-top:1px solid var(--line); }
-  .section-label{ font-size:12px; color:var(--ink); font-weight:600; margin-bottom:8px; }
-  .section-label span{ color:var(--ink-dimmer); font-weight:400; }
-  .empty-goals{ font-size:11.5px; color:var(--ink-dimmer); padding:5px 0; }
-  .manual-row{ display:flex; align-items:center; gap:9px; }
-  .manual-row input[type="number"]{
-    width:48px; text-align:center; background:var(--bg); border:1px solid var(--line-strong); border-radius:7px;
-    color:var(--ink); font-family:'Chakra Petch',sans-serif; font-size:17px; font-weight:600; padding:7px 0;
-  }
-  .manual-row .save{
-    margin-left:auto; background:var(--amber); color:#221503; border:none; font-weight:600; font-size:12.5px;
-    padding:8px 14px; border-radius:7px; cursor:pointer;
-  }
-
-  .toast{
-    position:fixed; left:50%; bottom:20px; transform:translateX(-50%) translateY(20px);
-    background:var(--panel-2); border:1px solid var(--line-strong); color:var(--ink); font-size:13px;
-    padding:10px 16px; border-radius:100px; opacity:0; transition:opacity 0.2s, transform 0.2s;
-    pointer-events:none; z-index:50;
-  }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-
-  footer{ text-align:center; color:var(--ink-dimmer); font-size:11px; margin-top:26px; padding:0 16px; line-height:1.7; }
-
-  /* ---------- Print report source (used to generate PDF) ---------- */
-  #printReport{
-    display:none;
-    position:absolute; top:0; left:0; width:210mm; min-height:297mm;
-    background:#fff; color:#111; z-index:99999; opacity:1;
-    font-family:'Prompt', Arial, sans-serif; pointer-events:none;
-    box-sizing:border-box;
-  }
-  .pr-day{ padding:8mm 10mm; page-break-after:always; }
-  .pr-day:last-child{ page-break-after:auto; }
-  .pr-title{ font-size:22px; font-weight:700; margin:0 0 4mm; }
-  .pr-venue{ font-size:11px; color:#777; margin:-3mm 0 5mm; }
-  .pr-group{ font-weight:700; font-size:15px; margin:5mm 0 2mm; border-bottom:1px solid #ddd; padding-bottom:1mm; }
-  .pr-game{ font-size:11px; color:#777; margin:4mm 0 0.5mm; font-weight:600; }
-  .pr-teams{ font-size:14px; font-weight:600; margin-bottom:1mm; }
-  .pr-goal{ font-size:12px; margin:0.5mm 0 0.5mm 3mm; color:#444; }
-  .pr-goal.pr-final{ font-weight:700; text-decoration:underline; color:#000; }
-  .pr-pending{ font-size:12px; color:#999; font-style:italic; margin-left:3mm; }
-  .pr-break{ text-align:center; font-size:11px; color:#999; margin:4mm 0; }
-  .pdf-busy{ opacity:0.6; pointer-events:none; }
-
-
-  /* Native browser print — reliable on iPad/iPhone Safari */
-  @media print{
-    @page{ size:A4; margin:0; }
-    html,body{ background:#fff !important; margin:0 !important; padding:0 !important; }
-    body > *:not(#printReport){ display:none !important; }
-    #printReport{
-      display:block !important; visibility:visible !important; opacity:1 !important;
-      position:static !important; width:210mm !important; min-height:297mm !important;
-      margin:0 !important; background:#fff !important; color:#111 !important;
-      z-index:auto !important; pointer-events:auto !important;
-    }
-    .pr-day{ page-break-after:always !important; break-after:page !important; }
-    .pr-day:last-child{ page-break-after:auto !important; break-after:auto !important; }
-  }
-
-  #adminGate{position:fixed;inset:0;background:rgba(10,21,34,.97);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
-  #adminBox{width:min(420px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;padding:22px}
-  #adminBox h2{margin:0 0 8px;font-family:'Chakra Petch',sans-serif}
-  #adminEmail,#adminPassword{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font-size:16px;margin:12px 0}
-  #adminEnter{width:100%;padding:11px;border:0;border-radius:9px;background:var(--amber);font-weight:700;cursor:pointer}
-  #adminErr{color:var(--red);font-size:12px;margin-top:8px;min-height:18px}
-
-  /* ---------- DPSCUP admin premium refresh ---------- */
-  header.hero{position:relative;overflow:hidden}
-  header.hero:before{content:"";position:absolute;inset:-50px -20px auto;height:190px;background:radial-gradient(circle at 15% 25%,rgba(225,82,82,.20),transparent 40%),radial-gradient(circle at 90% 10%,rgba(245,166,35,.12),transparent 38%);pointer-events:none}
-  header.hero>*{position:relative}
-  .admin-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:rgba(225,82,82,.13);border:1px solid rgba(225,82,82,.35);color:#ff8d8d;font-size:10px;font-weight:600;margin-top:8px}
-  .admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:13px}.admin-stat{padding:9px 7px;text-align:center;background:rgba(18,38,65,.8);border:1px solid var(--line);border-radius:10px}.admin-stat b{display:block;font-family:'Chakra Petch';font-size:18px}.admin-stat span{font-size:9px;color:var(--ink-dim)}
-  .top-admin{margin:14px 0 6px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:rgba(10,21,34,.5)}.top-admin-title{padding:8px 10px;font-size:11px;font-weight:600;color:var(--amber);border-bottom:1px solid var(--line)}.top-admin-row{display:grid;grid-template-columns:25px 1fr auto;gap:7px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:11px}.top-admin-row:last-child{border-bottom:0}.top-admin-row small{display:block;color:var(--ink-dim);font-size:9px}.top-admin-row b{font-family:'Chakra Petch';font-size:16px}
-
-  .reports-panel{margin:16px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(10,21,34,.65)}
-  .reports-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
-  .reports-head h2{margin:0;font-size:15px}.reports-count{min-width:24px;padding:3px 7px;border-radius:999px;background:rgba(225,82,82,.18);color:#ff9b9b;text-align:center;font-size:11px}
-  .report-add{border:1px solid var(--line-strong);background:var(--amber);color:#111;border-radius:8px;padding:7px 10px;font-weight:700;cursor:pointer}
-  .report-row{padding:12px 14px;border-bottom:1px solid var(--line);display:grid;gap:6px}.report-row:last-child{border-bottom:0}
-  .report-meta{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--ink-dim)}.report-type{font-weight:700;color:var(--ink)}
-  .report-detail{font-size:12px;line-height:1.55;white-space:pre-wrap}.report-actions{display:flex;gap:7px;flex-wrap:wrap}.report-actions button{border:1px solid var(--line-strong);background:transparent;color:var(--ink);border-radius:7px;padding:6px 9px;font-size:10px;cursor:pointer}.report-actions .done{background:rgba(48,190,126,.12);border-color:rgba(48,190,126,.35)}.report-actions .danger{background:rgba(225,82,82,.1);border-color:rgba(225,82,82,.35);color:#ff9b9b}
-  .report-status-done{opacity:.58}.report-status-done .report-type{text-decoration:line-through}
-  .admin-report-modal{position:fixed;inset:0;z-index:120;background:rgba(2,10,18,.78);display:none;align-items:center;justify-content:center;padding:16px}.admin-report-modal.show{display:flex}.admin-report-box{width:min(520px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;padding:16px;box-shadow:0 20px 70px rgba(0,0,0,.45)}.admin-report-box h3{margin:0 0 12px}.admin-report-box input,.admin-report-box select,.admin-report-box textarea{width:100%;box-sizing:border-box;background:var(--bg);color:var(--ink);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin:5px 0 10px;font-size:16px}.admin-report-box textarea{min-height:120px;resize:vertical}.admin-report-box label{font-size:11px;color:var(--ink-dim)}.admin-report-actions{display:flex;gap:8px}.admin-report-actions button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line-strong);cursor:pointer}.admin-report-actions .save{background:var(--amber);font-weight:700}
+<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DPSCUP Admin — DPSPN</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script><script src="firebase-config.js"></script><style>
+:root{--navy:#062b67;--blue:#1769e0;--pale:#f6f9fd;--ink:#102b50;--muted:#7185a3;--line:#dce7f5;--red:#e94250;--green:#16a66b;--gold:#e9a500;--shadow:0 12px 34px rgba(16,54,100,.08);--panel:#fff;--bg:#f7faff;--ink-dim:#7185a3;--ink-dimmer:#9aabc0;--line-strong:#cfdced;--amber:#e9a500;--turf:#16a66b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Prompt',system-ui,sans-serif}.wrap{max-width:1080px;margin:auto;padding:0 20px 50px}.hero{margin-top:18px;background:linear-gradient(135deg,#fff,#edf5ff);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow)}.eyebrow{font-size:12px;color:var(--muted)}.title{font-family:'Chakra Petch';font-size:48px;margin:8px 0;color:var(--navy)}.title .no{color:var(--blue)}.view-only{display:inline-flex;margin-top:8px;padding:7px 10px;border:1px solid #cfe0f5;border-radius:999px;color:var(--blue);font-size:11px;background:#fff}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.toolbar button{border:1px solid #cbdcf1;background:#fff;color:var(--navy);border-radius:10px;padding:10px 14px;font-family:'Prompt';font-weight:600;cursor:pointer}.toolbar button.primary{background:var(--blue);border-color:var(--blue);color:#fff}.days{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.days button{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;font-family:'Prompt';color:#6d82a0}.days button.active{background:var(--blue);color:#fff;border-color:var(--blue)}.days .sub{display:block;font-size:10px;margin-top:2px;opacity:.7}.next-line{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px;margin-top:12px}.next-line .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}.day{display:none}.day.active{display:block}.group-label{display:flex;align-items:center;gap:8px;color:#6c82a0;font-size:12px;margin:18px 0 6px}.group-label .rule{flex:1;height:1px;background:var(--line)}.break-row{text-align:center;background:#eef5ff;border-radius:10px;padding:12px;color:#7b8da6;font-size:12px;margin:8px 0}.match{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px;margin:8px 0;box-shadow:0 6px 18px rgba(16,54,100,.04)}.m-row{display:flex;align-items:center;gap:10px}.m-time{width:50px;text-align:center;font-family:'Chakra Petch';font-weight:700;color:#607693;font-size:12px}.m-teams{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:1}.m-name{font-size:13px;line-height:1.55}.m-name.win{font-weight:700}.m-name.lose{color:#97a6b9}.m-score{font-family:'Chakra Petch';font-size:22px;font-weight:700;color:var(--navy);white-space:nowrap}.m-score .dash{color:#9aabc0;margin:0 4px}.m-score.tbd{font-family:'Prompt';font-size:11px;color:#9aabc0}.goal-log{margin:8px 0 0 60px;padding-top:7px;border-top:1px solid #edf2f8;color:#7185a3;font-size:11px;line-height:1.8}.m-action{margin:8px 0 0 60px}.m-action button{border:0;background:#eef5ff;color:var(--blue);border-radius:8px;padding:7px 10px;font-family:'Prompt';font-size:11px}.panel{display:none;margin:9px 0 0 60px;background:#f8fbff;border:1px solid #d9e6f5;border-radius:12px;padding:12px}.panel.open{display:block}.editor-title{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:9px}.manual-row{display:flex;align-items:center;gap:7px}.manual-row input{width:50px;text-align:center;background:#fff;border:1px solid #cfddec;border-radius:8px;padding:8px;font-size:16px}.manual-row .save,.save{background:var(--blue)!important;color:#fff!important;border:0!important;border-radius:8px;padding:8px 12px;font-family:'Prompt';font-weight:700}.scorer-section{margin-top:12px}.section-label{font-size:11px;color:#6c82a0;font-weight:700;margin-bottom:7px}.goal-add{display:flex;align-items:center;gap:6px;margin:7px 0}.goal-add .team-lbl{width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;color:#6c82a0}.goal-add input{flex:1;min-width:0;background:#fff;border:1px solid #cfddec;border-radius:8px;padding:8px;font-size:16px}.goal-add .og{font-size:10px;color:#7185a3;white-space:nowrap}.goal-add button.add{background:#e9f7f0;color:#11875a;border:1px solid #b9e6d0;border-radius:8px;padding:8px;font-family:'Prompt';font-weight:700}.logged-row{display:flex;gap:7px;align-items:center;padding:5px 0;font-size:11px;color:#6f829f}.logged-row .sc{font-family:'Chakra Petch';font-weight:700;color:var(--navy);width:35px}.logged-row .rm{margin-left:auto;border:0;background:none;color:#9aaabd}.panel-foot{display:flex;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid #e4edf7;font-size:10px;color:#91a2b8}.panel-foot .close{border:0;background:none;color:var(--blue);font-family:'Prompt'}.reports-panel,.summary-admin{background:#fff;border:1px solid var(--line);border-radius:16px;margin:16px 0;box-shadow:var(--shadow);overflow:hidden}.reports-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}.reports-head h2{font-size:15px;margin:0;color:var(--navy)}.reports-count{display:inline-block;min-width:25px;text-align:center;background:#ffe7ea;color:#c72f3d;border-radius:999px;padding:3px 7px;font-size:11px}.report-add{border:0;background:var(--gold);color:#fff;border-radius:8px;padding:8px 11px;font-family:'Prompt';font-weight:700}.report-row{padding:13px 16px;border-bottom:1px solid #edf2f8}.report-meta{display:flex;justify-content:space-between;color:#8b9db4;font-size:10px}.report-type{font-weight:700;margin-top:5px;color:var(--navy)}.report-detail{font-size:12px;margin-top:4px;white-space:pre-wrap}.report-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.report-actions button{border:1px solid #cfdeef;background:#fff;border-radius:8px;padding:6px 9px;font-family:'Prompt';font-size:10px}.report-actions .done{background:#edf9f3;border-color:#bfe6d1;color:#12885b}.report-actions .danger{color:#c72f3d;background:#fff3f4}.report-status-done{opacity:.55}.admin-report-modal{position:fixed;inset:0;background:rgba(4,23,49,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}.admin-report-modal.show{display:flex}.admin-report-box{width:min(520px,100%);background:#fff;border-radius:18px;padding:18px;box-shadow:0 25px 70px rgba(4,23,49,.25)}.admin-report-box h3{margin:0 0 12px;color:var(--navy)}.admin-report-box label{font-size:11px;color:#7086a4}.admin-report-box input,.admin-report-box select,.admin-report-box textarea{width:100%;margin:5px 0 10px;padding:11px;border:1px solid #cfddec;border-radius:9px;background:#f9fbfe;font-family:'Prompt';font-size:16px}.admin-report-actions{display:flex;gap:8px}.admin-report-actions button{flex:1;border:1px solid #cfdeef;background:#fff;border-radius:9px;padding:10px;font-family:'Prompt'}.admin-report-actions .save{background:var(--blue);color:#fff}.summary-admin-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.summary-admin-head h2{margin:0;font-size:16px;color:var(--navy)}.summary-form{padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.summary-field label{font-size:10px;color:#7185a3}.summary-field input{width:100%;margin-top:5px;padding:10px;border:1px solid #cfddec;border-radius:9px;font-family:'Prompt';font-size:16px;background:#f9fbfe}.summary-save-row{padding:0 15px 15px}.summary-save-row button{background:var(--blue);color:#fff;border:0;border-radius:9px;padding:10px 15px;font-family:'Prompt';font-weight:700}.summary-preview{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:0 15px 15px}.summary-preview div{background:#f2f7ff;border:1px solid #dce8f6;border-radius:10px;padding:9px;text-align:center}.summary-preview span{display:block;font-size:9px;color:#8093ac}.summary-preview b{display:block;font-size:11px;margin-top:3px;color:var(--navy);overflow-wrap:anywhere}#adminGate{position:fixed;inset:0;background:#f5f9ff;z-index:200;display:flex;align-items:center;justify-content:center;padding:18px}#adminBox{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}#adminBox h2{margin:0;color:var(--navy);font-family:'Chakra Petch'}#adminEmail,#adminPassword{width:100%;margin:10px 0;padding:12px;border:1px solid #cfddec;border-radius:9px;font-size:16px}#adminEnter{width:100%;border:0;border-radius:9px;padding:12px;background:var(--blue);color:#fff;font-family:'Prompt';font-weight:700}#adminErr{color:#c72f3d;font-size:11px;margin-top:8px;min-height:18px}.top-admin{background:#fff;border:1px solid var(--line);border-radius:14px;margin:14px 0;overflow:hidden}.top-admin-title{padding:11px 14px;font-size:12px;color:var(--navy);font-weight:700;border-bottom:1px solid var(--line)}.top-admin-row{display:grid;grid-template-columns:25px 1fr auto;gap:8px;padding:8px 14px;border-bottom:1px solid #edf2f8}.top-admin-row small{display:block;color:#8194ad;font-size:9px}.top-admin-row b{font-family:'Chakra Petch'}.pdf-busy{opacity:.6;pointer-events:none}@media(max-width:700px){.summary-form{grid-template-columns:1fr}.summary-preview{grid-template-columns:1fr 1fr}.m-time{width:44px}.goal-add .team-lbl{width:82px}.panel{margin-left:0}.goal-log,.m-action{margin-left:0}.days{gap:6px}}
+@media print{#adminGate,.hero,.days,.reports-panel,.summary-admin,.top-admin,.m-action,.panel,footer{display:none!important}#printReport{display:block!important;position:static!important;background:#fff!important;color:#111!important}.pr-day{page-break-after:always!important}}
 </style>
-</head>
-<body>
-<div id="adminGate">
-  <div id="adminBox">
-    <h2>เข้าสู่ระบบผู้ดูแล</h2>
-    <div style="color:var(--ink-dim);font-size:13px;line-height:1.6">
-      เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น
-    </div>
-    <input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username">
-    <input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password">
-    <button id="adminEnter">เข้าสู่ระบบ</button>
-    <div id="adminErr"></div>
-  </div>
-</div>
-<div class="wrap">
-  <header class="hero">
-    <div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div>
-    <h1 class="title">DPSCUP <span class="no">ADMIN</span></h1>
-    <div class="eyebrow" style="margin-top:-4px;">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only" style="color:var(--amber)">🔐 เฉพาะแอดมินที่ล็อกอินแล้ว</div>
-
-    <div class="toolbar">
-      <button class="primary" id="printBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2M6 14h12v7H6v-7z"/></svg>
-        พิมพ์ / บันทึก PDF
-      </button>
-    </div>
-    <button id="logoutBtn" style="margin-top:8px;font-family:'Prompt',sans-serif;font-size:12px;color:var(--ink-dim);background:none;border:1px solid var(--line-strong);border-radius:8px;padding:7px 10px;cursor:pointer">ออกจากระบบ</button>
-
-    <div class="next-line" id="nextLine">
-      <div class="dot"></div>
-      <span id="nextText">กำลังโหลด…</span>
-    </div>
-  </header>
-
-  <nav class="days" id="dayTabs">
-    <button data-day="fri"><span class="d">ศุกร์ 11 ก.ย.</span><span class="sub">ผลการแข่งขัน</span></button>
-    <button data-day="sat"><span class="d">เสาร์ 12 ก.ย.</span><span class="sub">รอบเช้า–บ่าย</span></button>
-    <button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button>
-  </nav>
-
-  <div class="top-admin" id="topAdmin"><div class="top-admin-title">👑 TOP SCORERS · จากข้อมูลที่บันทึกแล้ว</div></div>
-  <section class="reports-panel" id="reportsPanel">
-    <div class="reports-head"><h2>🛠️ รายงานปัญหาจากผู้ชม <span class="reports-count" id="reportsCount">0</span></h2><button class="report-add" id="adminReportAdd">＋ เพิ่มรายงาน</button></div>
-    <div id="reportsList"><div style="padding:14px;color:var(--ink-dim);font-size:11px">กำลังโหลดรายงาน…</div></div>
-  </section>
-
-  <section class="day" id="day-fri"></section>
-  <section class="day" id="day-sat"></section>
-  <section class="day" id="day-sun"></section>
-
-  <footer>
-    หน้านี้แสดงผลจากฐานข้อมูลกลางแบบเรียลไทม์ · เมื่อแอดมินแก้สกอร์ คนดูจะเห็นทันที<br>
-    ที่มาโปรแกรมแข่งขัน: DewanPiraya Official
-  </footer>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<div class="admin-report-modal" id="adminReportModal">
-  <div class="admin-report-box">
-    <h3>🛠️ เพิ่มรายงานปัญหา</h3>
-    <label>ชื่อผู้แจ้ง<input id="adminReportName" placeholder="เช่น ทีมงาน / ผู้ชม"></label>
-    <label>ประเภท<select id="adminReportType"><option>⚽ สกอร์ผิด</option><option>👤 ชื่อผู้ทำประตูผิด</option><option>📱 การแสดงผลผิดปกติ</option><option>🐛 เว็บไซต์มีปัญหา</option><option>📣 อื่น ๆ</option></select></label>
-    <label>รายละเอียด<textarea id="adminReportDetail" placeholder="รายละเอียดปัญหา..."></textarea></label>
-    <div class="admin-report-actions"><button id="adminReportCancel">ยกเลิก</button><button class="save" id="adminReportSave">บันทึกรายงาน</button></div>
-  </div>
-</div>
-<div id="printReport"></div>
-
+<body><div id="adminGate"><div id="adminBox"><h2>🔐 เข้าสู่ระบบผู้ดูแล</h2><div style="color:#7185a3;font-size:12px;line-height:1.6;margin-top:6px">เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น</div><input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username"><input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"><button id="adminEnter">เข้าสู่ระบบ</button><div id="adminErr"></div></div></div><div class="wrap"><header class="hero"><div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div><h1 class="title">DPSCUP <span class="no">ADMIN</span></h1><div class="eyebrow">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">🔐 แอดมินเท่านั้น</div><div class="toolbar"><button class="primary" id="printBtn">🖨️ พิมพ์ / บันทึก PDF</button><button id="logoutBtn">ออกจากระบบ</button></div><div class="next-line" id="nextLine"><span class="dot"></span><span id="nextText">กำลังโหลด…</span></div></header><nav class="days" id="dayTabs"><button data-day="fri"><span class="d">ศุกร์ 11 ก.ย.</span><span class="sub">ผลการแข่งขัน</span></button><button data-day="sat"><span class="d">เสาร์ 12 ก.ย.</span><span class="sub">รอบเช้า–บ่าย</span></button><button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button></nav>
+<section class="summary-admin"><div class="summary-admin-head"><h2>🏆 สรุปผลการแข่งขัน</h2><span style="font-size:10px;color:#91a2b8">กรอกเมื่อจบทัวร์นาเมนต์</span></div><div class="summary-form"><div class="summary-field"><label>🥇 แชมป์<input id="sumChampion" placeholder="ชื่อทีมแชมป์"></label></div><div class="summary-field"><label>🥈 รองแชมป์<input id="sumRunnerUp" placeholder="ชื่อทีมรองแชมป์"></label></div><div class="summary-field"><label>🥉 อันดับ 3<input id="sumThird" placeholder="ชื่อทีมอันดับ 3"></label></div><div class="summary-field"><label>⭐ นักเตะยอดเยี่ยม<input id="sumBestPlayer" placeholder="ชื่อผู้เล่น"></label></div><div class="summary-field"><label>🧤 ผู้รักษาประตูยอดเยี่ยม<input id="sumBestGoalkeeper" placeholder="ชื่อผู้เล่น"></label></div></div><div class="summary-save-row"><button id="summarySave">💾 บันทึกสรุปผล</button></div><div class="summary-preview" id="summaryPreviewAdmin"></div></section>
+<section class="reports-panel"><div class="reports-head"><h2>🛠️ รายงานปัญหาจากผู้ชม <span class="reports-count" id="reportsCount">0</span></h2><button class="report-add" id="adminReportAdd">＋ เพิ่มรายงาน</button></div><div id="reportsList"><div style="padding:15px;color:#91a2b8;font-size:11px">กำลังรอข้อมูลรายงาน…</div></div></section>
+<div class="top-admin" id="topAdmin"></div><section class="day" id="day-fri"></section><section class="day" id="day-sat"></section><section class="day" id="day-sun"></section><footer>ข้อมูลสกอร์และรายงานเชื่อมกับ Firebase แบบเรียลไทม์ · หน้า Admin นี้สำหรับทีมงานเท่านั้น</footer></div><div class="toast" id="toast"></div><div class="admin-report-modal" id="adminReportModal"><div class="admin-report-box"><h3>🛠️ เพิ่มรายงานปัญหา</h3><label>ชื่อผู้แจ้ง<input id="adminReportName" placeholder="เช่น ทีมงาน / ผู้ชม"></label><label>ประเภท<select id="adminReportType"><option>⚽ สกอร์ผิด</option><option>👤 ชื่อผู้ทำประตูผิด</option><option>📱 การแสดงผลผิดปกติ</option><option>🐛 เว็บไซต์มีปัญหา</option><option>📣 อื่น ๆ</option></select></label><label>รายละเอียด<textarea id="adminReportDetail" placeholder="รายละเอียดปัญหา..."></textarea></label><div class="admin-report-actions"><button id="adminReportCancel">ยกเลิก</button><button class="save" id="adminReportSave">บันทึกรายงาน</button></div></div></div><div id="printReport"></div>
 <script>
 (function(){
   "use strict";
@@ -681,7 +396,7 @@
     const scorerMap=new Map();
     MATCHES.forEach(m=>{if(m.isBreak)return;const r=currentResult(m);if(!r||r.mode!=="goals")return;const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]);gs.forEach(g=>{if(g.og||!g.scorer)return;const key=g.scorer+'||'+(g.team==='a'?m.a:m.b);const x=scorerMap.get(key)||{name:g.scorer,team:g.team==='a'?m.a:m.b,goals:0};x.goals++;scorerMap.set(key,x);});});
     const scorers=Array.from(scorerMap.values()).sort((a,b)=>b.goals-a.goals).slice(0,10);
-    let html = `<div class="pr-day"><div class="pr-title">DPSCUP ครั้งที่ 2 — รายงานผลการแข่งขัน</div><div class="pr-venue">11–13 กันยายน 2569 · สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="pr-group">👑 TOP SCORERS</div>`;
+    let html = `<div class="pr-day"><div class="pr-title">DPSCUP ครั้งที่ 2 — รายงานผลการแข่งขัน</div><div class="pr-group">🏆 สรุปผลการแข่งขัน</div><div class="pr-goal"><b>แชมป์:</b> ${escapeHtml(document.getElementById("sumChampion")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>รองแชมป์:</b> ${escapeHtml(document.getElementById("sumRunnerUp")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>อันดับ 3:</b> ${escapeHtml(document.getElementById("sumThird")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>นักเตะยอดเยี่ยม:</b> ${escapeHtml(document.getElementById("sumBestPlayer")?.value||"ยังไม่ประกาศ")}</div><div class="pr-goal"><b>ผู้รักษาประตูยอดเยี่ยม:</b> ${escapeHtml(document.getElementById("sumBestGoalkeeper")?.value||"ยังไม่ประกาศ")}</div><div class="pr-group">👑 TOP SCORERS</div><div class="pr-venue">11–13 กันยายน 2569 · สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>`;
     if(scorers.length) scorers.forEach((r,i)=>html+=`<div class="pr-goal"><b>${i+1}. ${escapeHtml(r.name)}</b> — ${escapeHtml(r.team)} · <b>${r.goals} ประตู</b></div>`); else html+='<div class="pr-pending">ยังไม่มีข้อมูลผู้ทำประตู</div>';
     html+='</div>';
     ["fri","sat","sun"].forEach(dayKey=>{
@@ -828,6 +543,8 @@
   firebase.auth().onAuthStateChanged(user => {
     if(user){
       gate.style.display = "none";
+      initReports();
+      loadAdminSummary();
     }else{
       gate.style.display = "flex";
     }
@@ -854,6 +571,28 @@
 
   const logoutBtn = document.getElementById("logoutBtn");
   if(logoutBtn) logoutBtn.onclick = () => firebase.auth().signOut();
+
+
+  // ---------- Tournament summary ----------
+  const SUMMARY_KEY = "dpscup-2-summary";
+  let summaryRef=null;
+  const summaryFields={champion:'sumChampion',runnerUp:'sumRunnerUp',thirdPlace:'sumThird',bestPlayer:'sumBestPlayer',bestGoalkeeper:'sumBestGoalkeeper'};
+  function loadAdminSummary(){
+    try{
+      summaryRef=firebase.database().ref(SUMMARY_KEY);
+      summaryRef.on('value',snap=>{const v=snap.val()||{}; Object.entries(summaryFields).forEach(([k,id])=>{const el=document.getElementById(id); if(el) el.value=v[k]||'';}); renderAdminSummaryPreview(v);});
+    }catch(e){console.error(e);}
+  }
+  function renderAdminSummaryPreview(v){
+    const box=document.getElementById('summaryPreviewAdmin'); if(!box)return;
+    const labels=[['แชมป์',v.champion],['รองแชมป์',v.runnerUp],['อันดับ 3',v.thirdPlace],['นักเตะยอดเยี่ยม',v.bestPlayer],['ผู้รักษาประตูยอดเยี่ยม',v.bestGoalkeeper]];
+    box.innerHTML=labels.map(x=>`<div><span>${x[0]}</span><b>${escReport(x[1]||'ยังไม่ประกาศ')}</b></div>`).join('');
+  }
+  document.getElementById('summarySave')?.addEventListener('click',async()=>{
+    if(!summaryRef){showToast('Firebase ยังไม่พร้อม');return;}
+    const v={champion:document.getElementById('sumChampion').value.trim().slice(0,120),runnerUp:document.getElementById('sumRunnerUp').value.trim().slice(0,120),thirdPlace:document.getElementById('sumThird').value.trim().slice(0,120),bestPlayer:document.getElementById('sumBestPlayer').value.trim().slice(0,120),bestGoalkeeper:document.getElementById('sumBestGoalkeeper').value.trim().slice(0,120),updatedAt:firebase.database.ServerValue.TIMESTAMP};
+    try{await summaryRef.set(v);showToast('บันทึกสรุปผลแล้ว ✓');}catch(e){console.error(e);showToast('บันทึกสรุปผลไม่สำเร็จ');}
+  });
 
   // ---------- Admin issue reports ----------
   let reportsRef = null;
@@ -904,7 +643,6 @@
     const p={name:(document.getElementById('adminReportName').value||'ทีมงานแอดมิน').trim().slice(0,80),type:document.getElementById('adminReportType').value,detail:detail.slice(0,1000),page:location.href,createdAt:firebase.database.ServerValue.TIMESTAMP,status:'new',createdBy:'admin'};
     try{await reportsRef.push(p);document.getElementById('adminReportName').value='';document.getElementById('adminReportDetail').value='';arm?.classList.remove('show');showToast('เพิ่มรายงานแล้ว');}catch(e){console.error(e);showToast('เพิ่มรายงานไม่สำเร็จ');}
   });
-  initReports();
   btn.onclick = login;
   password.addEventListener("keydown", e => { if(e.key==="Enter") login(); });
 })();
