@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DPSCUP ครั้งที่ 2 — ผู้ดูแลสกอร์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+<style>
+  :root{
+    --bg:#0A1522;
+    --panel:#122641;
+    --panel-2:#16304F;
+    --line: rgba(226,236,248,0.09);
+    --line-strong: rgba(226,236,248,0.18);
+    --ink:#E9F1FA;
+    --ink-dim:#8FA4BF;
+    --ink-dimmer:#5E7896;
+    --amber:#F5A623;
+    --amber-dim: rgba(245,166,35,0.15);
+    --turf:#39B26B;
+    --turf-dim: rgba(57,178,107,0.16);
+    --red:#E15252;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Prompt', system-ui, sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important;} }
+  .wrap{ max-width:600px; margin:0 auto; padding:0 16px; }
+
+  /* ---------- Hero (simplified) ---------- */
+  header.hero{ padding:26px 0 16px; border-bottom:1px solid var(--line); }
+  .eyebrow{ font-size:12px; color:var(--ink-dim); }
+  h1.title{
+    font-family:'Chakra Petch', sans-serif; font-weight:700;
+    font-size:clamp(32px, 10vw, 44px); line-height:0.95; margin:6px 0 8px; letter-spacing:-0.01em;
+  }
+  h1.title .no{ color:var(--amber); }
+
+  .toolbar{ display:flex; gap:8px; margin-top:14px; }
+  .toolbar button{
+    font-family:'Prompt', sans-serif; font-size:13px; font-weight:500;
+    border-radius:9px; padding:9px 14px; cursor:pointer; border:1px solid var(--line-strong);
+    background:var(--panel); color:var(--ink);
+    display:flex; align-items:center; gap:6px;
+  }
+  .toolbar button svg{ width:15px; height:15px; }
+  .toolbar button.primary{ background:var(--amber-dim); color:var(--amber); border-color:rgba(245,166,35,0.45); }
+
+  .next-line{
+    margin-top:14px; display:flex; align-items:center; gap:9px;
+    font-size:13px; color:var(--ink-dim);
+  }
+  .next-line .dot{ width:7px; height:7px; border-radius:50%; background:var(--turf); flex-shrink:0; }
+  .next-line.is-live .dot{ background:var(--red); animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.6);opacity:0.55;} }
+  .next-line b{ color:var(--ink); font-weight:500; }
+
+  /* ---------- Day tabs ---------- */
+  nav.days{
+    position:sticky; top:0; z-index:20; display:flex; gap:6px;
+    padding:14px 0 12px; background:linear-gradient(180deg, var(--bg) 80%, transparent);
+  }
+  nav.days button{
+    flex:1; font-family:'Prompt', sans-serif; font-size:13px; font-weight:500; color:var(--ink-dim);
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:9px 6px;
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  nav.days button .sub{ font-size:10px; color:var(--ink-dimmer); }
+  nav.days button.active{ background:var(--amber-dim); border-color:rgba(245,166,35,0.5); color:var(--amber); }
+  nav.days button.active .sub{ color:rgba(245,166,35,0.75); }
+  nav.days button .todaymark{ display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--turf); margin-left:4px; }
+
+  section.day{ display:none; }
+  section.day.active{ display:block; }
+
+  .group-label{ display:flex; align-items:baseline; gap:8px; margin:20px 2px 8px; color:var(--ink-dim); font-size:12.5px; }
+  .group-label .rule{ flex:1; height:1px; background:var(--line); }
+  .group-label:first-child{ margin-top:4px; }
+  .break-row{ text-align:center; font-size:12px; color:var(--ink-dimmer); padding:12px 0; }
+
+  /* ---------- Match card ---------- */
+  .match{ border-bottom:1px solid var(--line); padding:13px 2px; }
+  .m-row{ display:flex; align-items:center; gap:10px; }
+  .m-time{ font-family:'Chakra Petch', sans-serif; font-size:12px; color:var(--ink-dimmer); width:38px; flex-shrink:0; }
+  .m-teams{ flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .m-names{ min-width:0; }
+  .m-name{ font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+  .m-name.win{ font-weight:600; }
+  .m-name.lose{ color:var(--ink-dimmer); }
+  .m-score{ font-family:'Chakra Petch', sans-serif; font-weight:700; font-size:17px; white-space:nowrap; flex-shrink:0; }
+  .m-score .dash{ color:var(--ink-dimmer); margin:0 3px; font-weight:400; }
+  .m-score.tbd{ font-size:13px; font-weight:500; color:var(--ink-dimmer); }
+
+  .goal-log{ margin:8px 0 0 48px; font-size:12px; color:var(--ink-dim); line-height:1.9; }
+  .goal-log .g-final{ color:var(--ink); font-weight:600; text-decoration:underline; text-underline-offset:3px; }
+
+  .m-action{ margin:8px 0 0 48px; }
+  .m-action button{
+    font-family:'Prompt', sans-serif; font-size:12.5px; color:var(--amber); background:none; border:none;
+    padding:0; cursor:pointer;
+  }
+
+  /* ---------- Report panel ---------- */
+  .panel{ display:none; margin:10px 0 2px 48px; background:var(--panel); border:1px solid var(--line-strong); border-radius:11px; padding:12px; }
+  .panel.open{ display:block; }
+  .goal-add{ display:flex; align-items:center; gap:7px; margin-bottom:8px; }
+  .goal-add .team-lbl{ font-size:12px; color:var(--ink-dim); width:88px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .goal-add input[type="text"]{
+    flex:1; background:var(--bg); border:1px solid var(--line-strong); border-radius:7px;
+    color:var(--ink); font-family:'Prompt',sans-serif; font-size:12.5px; padding:8px 9px;
+  }
+  .goal-add input::placeholder{ color:var(--ink-dimmer); }
+  .goal-add label.og{ font-size:10.5px; color:var(--ink-dimmer); display:flex; align-items:center; gap:3px; flex-shrink:0; white-space:nowrap; }
+  .goal-add button.add{
+    background:var(--turf-dim); color:var(--turf); border:none; border-radius:7px; padding:8px 10px;
+    font-size:12px; font-weight:600; cursor:pointer; flex-shrink:0;
+  }
+  .logged{ margin:6px 0 4px; }
+  .logged-row{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-dim); padding:4px 0; }
+  .logged-row .sc{ font-family:'Chakra Petch',sans-serif; color:var(--ink); font-weight:600; width:34px; flex-shrink:0; }
+  .logged-row .rm{ margin-left:auto; background:none; border:none; color:var(--ink-dimmer); cursor:pointer; font-size:14px; padding:2px 6px; }
+  .panel-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .panel-foot .switch{ font-size:11.5px; color:var(--ink-dimmer); background:none; border:none; cursor:pointer; text-decoration:underline; }
+  .panel-foot .close{ font-size:12.5px; color:var(--amber); background:none; border:none; cursor:pointer; font-weight:500; }
+
+  .manual-row{ display:flex; align-items:center; gap:9px; }
+  .manual-row input[type="number"]{
+    width:48px; text-align:center; background:var(--bg); border:1px solid var(--line-strong); border-radius:7px;
+    color:var(--ink); font-family:'Chakra Petch',sans-serif; font-size:17px; font-weight:600; padding:7px 0;
+  }
+  .manual-row .save{
+    margin-left:auto; background:var(--amber); color:#221503; border:none; font-weight:600; font-size:12.5px;
+    padding:8px 14px; border-radius:7px; cursor:pointer;
+  }
+
+  .toast{
+    position:fixed; left:50%; bottom:20px; transform:translateX(-50%) translateY(20px);
+    background:var(--panel-2); border:1px solid var(--line-strong); color:var(--ink); font-size:13px;
+    padding:10px 16px; border-radius:100px; opacity:0; transition:opacity 0.2s, transform 0.2s;
+    pointer-events:none; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  footer{ text-align:center; color:var(--ink-dimmer); font-size:11px; margin-top:26px; padding:0 16px; line-height:1.7; }
+
+  /* ---------- Print report (rendered off-screen, captured to PDF) ---------- */
+  #printReport{
+    position:fixed; top:0; left:0; width:210mm; background:#fff; color:#111; z-index:-1; opacity:0.01;
+    font-family:'Prompt', Arial, sans-serif; pointer-events:none;
+  }
+  .pr-day{ padding:8mm 10mm; page-break-after:always; }
+  .pr-day:last-child{ page-break-after:auto; }
+  .pr-title{ font-size:22px; font-weight:700; margin:0 0 4mm; }
+  .pr-venue{ font-size:11px; color:#777; margin:-3mm 0 5mm; }
+  .pr-group{ font-weight:700; font-size:15px; margin:5mm 0 2mm; border-bottom:1px solid #ddd; padding-bottom:1mm; }
+  .pr-game{ font-size:11px; color:#777; margin:4mm 0 0.5mm; font-weight:600; }
+  .pr-teams{ font-size:14px; font-weight:600; margin-bottom:1mm; }
+  .pr-goal{ font-size:12px; margin:0.5mm 0 0.5mm 3mm; color:#444; }
+  .pr-goal.pr-final{ font-weight:700; text-decoration:underline; color:#000; }
+  .pr-pending{ font-size:12px; color:#999; font-style:italic; margin-left:3mm; }
+  .pr-break{ text-align:center; font-size:11px; color:#999; margin:4mm 0; }
+  .pdf-busy{ opacity:0.6; pointer-events:none; }
+
+  #adminGate{position:fixed;inset:0;background:rgba(10,21,34,.97);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+  #adminBox{width:min(420px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;padding:22px}
+  #adminBox h2{margin:0 0 8px;font-family:'Chakra Petch',sans-serif}
+  #adminPin{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font-size:16px;margin:12px 0}
+  #adminEnter{width:100%;padding:11px;border:0;border-radius:9px;background:var(--amber);font-weight:700;cursor:pointer}
+  #adminErr{color:var(--red);font-size:12px;margin-top:8px;min-height:18px}
+</style>
+</head>
+<body>
+<div id="adminGate">
+  <div id="adminBox">
+    <h2>เข้าสู่ระบบผู้ดูแล</h2>
+    <div style="color:var(--ink-dim);font-size:13px;line-height:1.6">ใช้หน้านี้สำหรับแก้สกอร์ ส่วนคนดูเปิด <b>index.html</b></div>
+    <input id="adminPin" type="password" placeholder="รหัสผู้ดูแล" autocomplete="off">
+    <button id="adminEnter">เข้าใช้งาน</button>
+    <div id="adminErr"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div>
+    <h1 class="title">DPSCUP <span class="no">ADMIN</span></h1>
+    <div class="eyebrow" style="margin-top:-4px;">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>
+
+    <div class="toolbar">
+      <button class="primary" id="printBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V3h12v6M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2M6 14h12v7H6v-7z"/></svg>
+        พิมพ์ / บันทึก PDF
+      </button>
+    </div>
+
+    <div class="next-line" id="nextLine">
+      <div class="dot"></div>
+      <span id="nextText">กำลังโหลด…</span>
+    </div>
+  </header>
+
+  <nav class="days" id="dayTabs">
+    <button data-day="fri"><span class="d">ศุกร์ 11 ก.ย.</span><span class="sub">ผลการแข่งขัน</span></button>
+    <button data-day="sat"><span class="d">เสาร์ 12 ก.ย.</span><span class="sub">รอบเช้า–บ่าย</span></button>
+    <button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button>
+  </nav>
+
+  <section class="day" id="day-fri"></section>
+  <section class="day" id="day-sat"></section>
+  <section class="day" id="day-sun"></section>
+
+  <footer>
+    หน้านี้แสดงผลจากฐานข้อมูลกลางแบบเรียลไทม์ · เมื่อแอดมินแก้สกอร์ คนดูจะเห็นทันที<br>
+    ที่มาโปรแกรมแข่งขัน: DewanPiraya Official
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="printReport"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Data ----------
+  // Friday results are fixed goal logs (order = chronological, score computed cumulatively)
+  const MATCHES = [
+    {id:"fri-1", day:"fri", group:"ม.ต้น", time:"16:30", a:"DARK RAVEN X VORTEX", b:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", final:true,
+      goals:[{team:"b", scorer:"กิรติ", og:true}]},
+    {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO โล้น", b:"เสืออ้วน X YIYA KATONG", final:true,
+      goals:[{team:"a", scorer:"ฮานีฟ (โล้น)"},{team:"a", scorer:"ฮานีฟ (โล้น)"},{team:"a", scorer:"ฮานีฟ (โล้น)"}]},
+    {id:"fri-3", day:"fri", group:"ม.ต้น", time:"17:10", a:"HUFFAZ WORRIORS FC", b:"VORTEX", final:true,
+      goals:[{team:"b", scorer:"อัรฟาริส"},{team:"b", scorer:"รุชดาน"},{team:"b", scorer:"อัรฮาม"}]},
+    {id:"fri-4", day:"fri", group:"ม.ปลาย", time:"17:30", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด", final:true,
+      goals:[{team:"a", scorer:"ฟารุก"}]},
+
+    {id:"sat-0",  day:"sat", start:"2026-09-12T07:00:00+07:00", end:"2026-09-12T07:20:00+07:00", time:"07:00", a:"บูเดาะบูล่ะห์", b:"ลุงโชเล่ X ปูดอง"},
+    {id:"sat-0b", day:"sat", start:"2026-09-12T07:20:00+07:00", end:"2026-09-12T07:40:00+07:00", time:"07:20", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ซีเครท"},
+    {id:"sat-1",  day:"sat", start:"2026-09-12T08:20:00+07:00", end:"2026-09-12T08:40:00+07:00", time:"08:20", a:"DARK RAVENS X VORTEX", b:"อาหรับน้อยร้อยลีลา"},
+    {id:"sat-2",  day:"sat", start:"2026-09-12T08:40:00+07:00", end:"2026-09-12T09:00:00+07:00", time:"08:40", a:"ลูกชายคนโต X TWO โล้น", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
+    {id:"sat-3",  day:"sat", start:"2026-09-12T09:00:00+07:00", end:"2026-09-12T09:20:00+07:00", time:"09:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"Dewan G.20"},
+    {id:"sat-4",  day:"sat", start:"2026-09-12T09:20:00+07:00", end:"2026-09-12T09:40:00+07:00", time:"09:20", a:"TSP รุ่นที่ 4 ACADEMY 1", b:"ชาคริต X น้องกา"},
+    {id:"sat-5",  day:"sat", start:"2026-09-12T09:40:00+07:00", end:"2026-09-12T10:00:00+07:00", time:"09:40", a:"น้องใหม่ X Q-CHANGE", b:"ทีมงาน X อาเซียน"},
+    {id:"sat-6",  day:"sat", start:"2026-09-12T10:00:00+07:00", end:"2026-09-12T10:20:00+07:00", time:"10:00", a:"วัยรุ่นสายฮา X ทีเด็ด", b:"วัยรุ่นสายฮา X ซีเครท"},
+    {id:"sat-7",  day:"sat", start:"2026-09-12T10:20:00+07:00", end:"2026-09-12T10:40:00+07:00", time:"10:20", a:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", b:"อาหรับน้อยร้อยลีลา"},
+    {id:"sat-8",  day:"sat", start:"2026-09-12T10:40:00+07:00", end:"2026-09-12T11:00:00+07:00", time:"10:40", a:"เสืออ้วน X YIYA KATONG", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
+    {id:"sat-9",  day:"sat", start:"2026-09-12T11:00:00+07:00", end:"2026-09-12T11:20:00+07:00", time:"11:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ซีเครท"},
+    {id:"sat-10", day:"sat", start:"2026-09-12T11:20:00+07:00", end:"2026-09-12T11:40:00+07:00", time:"11:20", a:"HUFFAZ WORRIORS FC", b:"TSP รุ่นที่ 4 ACADEMY 1"},
+    {id:"sat-break", day:"sat", isBreak:true, time:"11:40 – 13:20", label:"พักเที่ยง และพักละหมาด",
+      start:"2026-09-12T11:40:00+07:00", end:"2026-09-12T13:20:00+07:00"},
+    {id:"sat-11", day:"sat", start:"2026-09-12T13:20:00+07:00", end:"2026-09-12T13:40:00+07:00", time:"13:20", a:"บูเดาะบูล่ะห์", b:"น้องใหม่ X Q-CHANGE"},
+    {id:"sat-12", day:"sat", start:"2026-09-12T13:40:00+07:00", end:"2026-09-12T14:00:00+07:00", time:"13:40", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ทีเด็ด"},
+    {id:"sat-13", day:"sat", start:"2026-09-12T14:00:00+07:00", end:"2026-09-12T14:20:00+07:00", time:"14:00", a:"VORTEX", b:"ชาคริต X น้องกา"},
+    {id:"sat-14", day:"sat", start:"2026-09-12T14:20:00+07:00", end:"2026-09-12T14:40:00+07:00", time:"14:20", a:"ลุงโชเล่ X ปูดอง", b:"ทีมงาน X อาเซียน"},
+    {id:"sat-15", day:"sat", start:"2026-09-12T14:40:00+07:00", end:"2026-09-12T15:00:00+07:00", time:"14:40", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด"},
+    {id:"sat-16", day:"sat", start:"2026-09-12T15:00:00+07:00", end:"2026-09-12T15:20:00+07:00", time:"15:00", a:"HUFFAZ WORRIORS FC", b:"ชาคริต X น้องกา"},
+
+    {id:"sun-1", day:"sun", start:"2026-09-13T08:30:00+07:00", end:"2026-09-13T08:50:00+07:00", time:"08:30", a:"บูเดาะบูล่ะห์", b:"ทีมงาน X อาเซียน"},
+    {id:"sun-2", day:"sun", start:"2026-09-13T08:50:00+07:00", end:"2026-09-13T09:10:00+07:00", time:"08:50", a:"VORTEX", b:"TSP รุ่นที่ 4 ACADEMY 1"},
+    {id:"sun-3", day:"sun", start:"2026-09-13T09:10:00+07:00", end:"2026-09-13T09:30:00+07:00", time:"09:10", a:"ลุงโชเล่ X ปูดอง", b:"น้องใหม่ X Q-CHANGE"},
+  ];
+
+  const STORAGE_KEY = "dpscup-2-scores";
+  let reported = {}; // { [id]: {mode:'goals', goals:[{team,scorer,og}]} | {mode:'manual', scoreA, scoreB} }
+
+  // ---------- Realtime cloud storage ----------
+  // Fill Firebase settings in firebase-config.js.
+  let cloudReady = false;
+  let dbRef = null;
+
+  async function loadScores(){
+    try{
+      if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){
+        firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);
+        dbRef = firebase.database().ref(STORAGE_KEY);
+        dbRef.on("value", snap => {
+          reported = snap.val() || {};
+          render();
+          updateCloudStatus("ออนไลน์ · อัปเดตเรียลไทม์");
+        }, err => {
+          console.error(err);
+          updateCloudStatus("เชื่อมต่อฐานข้อมูลไม่ได้");
+          render();
+        });
+        cloudReady = true;
+      } else {
+        updateCloudStatus("โหมดทดลอง · ยังไม่ได้ตั้งค่า Firebase");
+        try { reported = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch(e) { reported = {}; }
+        render();
+      }
+    }catch(e){
+      console.error(e);
+      updateCloudStatus("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      try { reported = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch(_) { reported = {}; }
+      render();
+    }
+  }
+
+  async function persist(){
+    try{
+      if(cloudReady && dbRef) await dbRef.set(reported);
+      else localStorage.setItem(STORAGE_KEY, JSON.stringify(reported));
+      return true;
+    }catch(e){
+      console.error(e);
+      showToast("บันทึกไม่สำเร็จ · ตรวจ Firebase");
+      return false;
+    }
+  }
+
+  function updateCloudStatus(text){
+    let badge = document.getElementById("cloudStatus");
+    if(!badge){
+      badge = document.createElement("div");
+      badge.id = "cloudStatus";
+      badge.style.cssText = "position:fixed;right:14px;bottom:14px;z-index:60;background:var(--panel);border:1px solid var(--line-strong);color:var(--ink-dim);font-size:11px;padding:6px 9px;border-radius:999px;box-shadow:0 4px 18px rgba(0,0,0,.25)";
+      document.body.appendChild(badge);
+    }
+    badge.textContent = "● " + text;
+  }
+
+  // ---------- Score helpers ----------
+  function scoreFromGoals(goals){
+    let a=0,b=0; const steps=[];
+    goals.forEach(g=>{
+      if(g.team==="a") a++; else b++;
+      steps.push({a,b, label:g.scorer ? g.scorer + (g.og ? " (เข้าประตูตัวเอง)" : "") : (g.og ? "เข้าประตูตัวเอง" : "")});
+    });
+    return {a,b,steps};
+  }
+  function currentResult(m){
+    if(m.final) return {mode:"goals", ...scoreFromGoals(m.goals)};
+    const rep = reported[m.id];
+    if(!rep) return null;
+    if(rep.mode==="manual") return {mode:"manual", a:rep.scoreA, b:rep.scoreB, steps:[]};
+    return {mode:"goals", ...scoreFromGoals(rep.goals || [])};
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  // ---------- Card rendering ----------
+  function matchCard(m){
+    if(m.isBreak) return `<div class="break-row">— ${m.label} · ${m.time} —</div>`;
+
+    const res = currentResult(m);
+    const hasScore = !!res;
+    const aWin = hasScore && res.a > res.b, bWin = hasScore && res.b > res.a;
+
+    const scoreHtml = hasScore
+      ? `<span class="m-score">${res.a}<span class="dash">–</span>${res.b}</span>`
+      : `<span class="m-score tbd">ยังไม่แข่ง</span>`;
+
+    let goalLogHtml = "";
+    if(hasScore && res.mode==="goals" && res.steps.length){
+      goalLogHtml = `<div class="goal-log">` + res.steps.map((s,i)=>{
+        const isLast = i===res.steps.length-1;
+        return `<div class="${isLast?'g-final':''}">${s.a}-${s.b}${s.label ? " ⚽ "+escapeHtml(s.label) : " ⚽"}</div>`;
+      }).join("") + `</div>`;
+    }
+
+    let actionHtml = "";
+    if(!m.final){
+      const rep = reported[m.id];
+      actionHtml = `<div class="m-action"><button data-toggle="${m.id}">${rep ? "แก้ไขผล" : "+ รายงานผล / ผู้ทำประตู"}</button></div>
+        ${panelHtml(m)}`;
+    }
+
+    return `
+      <div class="match">
+        <div class="m-row">
+          <div class="m-time">${m.time || ""}</div>
+          <div class="m-teams">
+            <div class="m-names">
+              <div class="m-name ${aWin?'win':bWin?'lose':''}">${escapeHtml(m.a)}</div>
+              <div class="m-name ${bWin?'win':aWin?'lose':''}" style="margin-top:3px;">${escapeHtml(m.b)}</div>
+            </div>
+            ${scoreHtml}
+          </div>
+        </div>
+        ${goalLogHtml}
+        ${actionHtml}
+      </div>`;
+  }
+
+  function panelHtml(m){
+    const rep = reported[m.id] || {mode:"goals", goals:[]};
+    const isManual = rep.mode === "manual";
+    const goals = rep.goals || [];
+    const rows = goals.map((g,i)=>{
+      const run = scoreFromGoals(goals.slice(0,i+1));
+      const label = g.scorer ? g.scorer + (g.og ? " (OG)" : "") : (g.og ? "เข้าประตูตัวเอง" : "ไม่ระบุชื่อ");
+      return `<div class="logged-row"><span class="sc">${run.a}-${run.b}</span><span>${escapeHtml(g.team==="a"?m.a:m.b)} · ${escapeHtml(label)}</span>
+        <button class="rm" data-rmgoal="${m.id}" data-idx="${i}">✕</button></div>`;
+    }).join("");
+
+    return `<div class="panel ${isManual ? '' : ''}" id="panel-${m.id}">
+        <div style="display:${isManual?'none':'block'}" id="goalsMode-${m.id}">
+          <div class="goal-add">
+            <span class="team-lbl">${escapeHtml(m.a)}</span>
+            <input type="text" id="scorerA-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
+            <label class="og"><input type="checkbox" id="ogA-${m.id}"> OG</label>
+            <button class="add" data-addgoal="${m.id}" data-team="a">+ ประตู</button>
+          </div>
+          <div class="goal-add">
+            <span class="team-lbl">${escapeHtml(m.b)}</span>
+            <input type="text" id="scorerB-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
+            <label class="og"><input type="checkbox" id="ogB-${m.id}"> OG</label>
+            <button class="add" data-addgoal="${m.id}" data-team="b">+ ประตู</button>
+          </div>
+          <div class="logged">${rows}</div>
+          <div class="panel-foot">
+            <button class="switch" data-switchmode="${m.id}" data-to="manual">ระบุแค่สกอร์ ไม่ใส่ชื่อ</button>
+            <button class="close" data-closepanel="${m.id}">เสร็จแล้ว</button>
+          </div>
+        </div>
+        <div style="display:${isManual?'block':'none'}" id="manualMode-${m.id}">
+          <div class="manual-row">
+            <input type="number" min="0" max="99" id="manA-${m.id}" value="${isManual ? rep.scoreA : ''}" placeholder="0">
+            <span style="color:var(--ink-dimmer)">–</span>
+            <input type="number" min="0" max="99" id="manB-${m.id}" value="${isManual ? rep.scoreB : ''}" placeholder="0">
+            <button class="save" data-savemanual="${m.id}">บันทึก</button>
+          </div>
+          <div class="panel-foot" style="border-top:none; margin-top:8px; padding-top:0;">
+            <button class="switch" data-switchmode="${m.id}" data-to="goals">ใส่ผู้ทำประตูทีละลูกแทน</button>
+            <button class="close" data-closepanel="${m.id}">เสร็จแล้ว</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderDay(dayKey){
+    const el = document.getElementById("day-" + dayKey);
+    const items = MATCHES.filter(m => m.day === dayKey);
+    if(dayKey === "fri"){
+      const groups = ["ม.ต้น", "ม.ปลาย"];
+      el.innerHTML = groups.map(g => {
+        const rows = items.filter(m => m.group === g).map(matchCard).join("");
+        return `<div class="group-label">${g}<span class="rule"></span></div>${rows}`;
+      }).join("");
+    } else {
+      el.innerHTML = items.map(matchCard).join("");
+    }
+  }
+
+  function render(){
+    const openPanels = new Set(
+      Array.from(document.querySelectorAll(".panel.open")).map(p => p.id.replace("panel-",""))
+    );
+    ["fri","sat","sun"].forEach(renderDay);
+    openPanels.forEach(id => { const p = document.getElementById("panel-"+id); if(p) p.classList.add("open"); });
+    bindEvents();
+    renderNextLine();
+  }
+
+  function bindEvents(){
+    document.querySelectorAll("[data-toggle]").forEach(btn=>{
+      btn.onclick = () => document.getElementById("panel-"+btn.dataset.toggle).classList.toggle("open");
+    });
+    document.querySelectorAll("[data-closepanel]").forEach(btn=>{
+      btn.onclick = () => document.getElementById("panel-"+btn.dataset.closepanel).classList.remove("open");
+    });
+    document.querySelectorAll("[data-addgoal]").forEach(btn=>{
+      btn.onclick = async () => {
+        const id = btn.dataset.addgoal, team = btn.dataset.team;
+        const scorer = document.getElementById(`scorer${team.toUpperCase()}-${id}`).value.trim();
+        const og = document.getElementById(`og${team.toUpperCase()}-${id}`).checked;
+        if(!reported[id] || reported[id].mode!=="goals") reported[id] = {mode:"goals", goals:[]};
+        reported[id].goals.push({team, scorer, og});
+        await persist();
+        render();
+        document.getElementById("panel-"+id).classList.add("open");
+      };
+    });
+    document.querySelectorAll("[data-rmgoal]").forEach(btn=>{
+      btn.onclick = async () => {
+        const id = btn.dataset.rmgoal, idx = parseInt(btn.dataset.idx,10);
+        reported[id].goals.splice(idx,1);
+        await persist();
+        render();
+        document.getElementById("panel-"+id).classList.add("open");
+      };
+    });
+    document.querySelectorAll("[data-switchmode]").forEach(btn=>{
+      btn.onclick = () => {
+        const id = btn.dataset.switchmode, to = btn.dataset.to;
+        document.getElementById("goalsMode-"+id).style.display = to==="goals" ? "block" : "none";
+        document.getElementById("manualMode-"+id).style.display = to==="manual" ? "block" : "none";
+      };
+    });
+    document.querySelectorAll("[data-savemanual]").forEach(btn=>{
+      btn.onclick = async () => {
+        const id = btn.dataset.savemanual;
+        const a = parseInt(document.getElementById("manA-"+id).value,10);
+        const b = parseInt(document.getElementById("manB-"+id).value,10);
+        if(isNaN(a) || isNaN(b)){ showToast("กรอกสกอร์ทั้งสองฝั่งก่อน"); return; }
+        reported[id] = {mode:"manual", scoreA:a, scoreB:b};
+        const ok = await persist();
+        if(ok) showToast("บันทึกผลแล้ว");
+        render();
+        document.getElementById("panel-"+id).classList.add("open");
+      };
+    });
+  }
+
+  // ---------- Tabs ----------
+  function setActiveDay(day){
+    document.querySelectorAll("#dayTabs button").forEach(b => b.classList.toggle("active", b.dataset.day === day));
+    document.querySelectorAll("section.day").forEach(s => s.classList.toggle("active", s.id === "day-" + day));
+  }
+  document.getElementById("dayTabs").addEventListener("click", (e)=>{
+    const btn = e.target.closest("button[data-day]");
+    if(btn) setActiveDay(btn.dataset.day);
+  });
+
+  // ---------- Next / live line ----------
+  function renderNextLine(){
+    const now = new Date();
+    const timed = MATCHES.filter(m => m.start && !m.isBreak);
+    let live=null, next=null;
+    for(const m of timed){
+      if(now >= new Date(m.start) && now < new Date(m.end)){ live=m; break; }
+    }
+    if(!live){
+      const upcoming = timed.filter(m => new Date(m.start) > now).sort((x,y)=> new Date(x.start)-new Date(y.start));
+      next = upcoming[0] || null;
+    }
+    const line = document.getElementById("nextLine");
+    const text = document.getElementById("nextText");
+    if(live){
+      line.classList.add("is-live");
+      text.innerHTML = `กำลังแข่ง <b>${escapeHtml(live.a)} vs ${escapeHtml(live.b)}</b>`;
+    } else if(next){
+      line.classList.remove("is-live");
+      const isSat = next.day==="sat";
+      text.innerHTML = `ถัดไป (${isSat?'เสาร์':'อาทิตย์'} ${next.time}) <b>${escapeHtml(next.a)} vs ${escapeHtml(next.b)}</b>`;
+    } else {
+      line.classList.remove("is-live");
+      text.textContent = "จบโปรแกรมสุดสัปดาห์นี้แล้ว";
+    }
+  }
+
+  // ---------- Print report ----------
+  const DAY_TITLES = {fri:"Score วันศุกร์ที่ 11 กันยายน 2569", sat:"Score วันเสาร์ที่ 12 กันยายน 2569", sun:"Score วันอาทิตย์ที่ 13 กันยายน 2569"};
+
+  function buildPrintReport(){
+    let html = "";
+    ["fri","sat","sun"].forEach(dayKey=>{
+      const items = MATCHES.filter(m => m.day===dayKey);
+      html += `<div class="pr-day"><div class="pr-title">${DAY_TITLES[dayKey]}</div><div class="pr-venue">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div>`;
+      let gameNo = 0;
+      let lastGroup = null;
+      items.forEach(m=>{
+        if(m.isBreak){ html += `<div class="pr-break">— ${m.label} · ${m.time} —</div>`; return; }
+        if(dayKey==="fri" && m.group !== lastGroup){
+          lastGroup = m.group;
+          html += `<div class="pr-group">${m.group}</div>`;
+        }
+        gameNo++;
+        const res = currentResult(m);
+        html += `<div class="pr-game">เกมที่ ${gameNo}${m.time ? " · " + m.time : ""}</div>`;
+        html += `<div class="pr-teams">${escapeHtml(m.a)} vs ${escapeHtml(m.b)}</div>`;
+        if(res && res.mode==="goals" && res.steps.length){
+          res.steps.forEach((s,i)=>{
+            const isLast = i===res.steps.length-1;
+            html += `<div class="pr-goal ${isLast?'pr-final':''}">${s.a}-${s.b}${s.label ? " (" + escapeHtml(s.label) + ")" : ""}</div>`;
+          });
+        } else if(res){
+          html += `<div class="pr-goal pr-final">${res.a}-${res.b}</div>`;
+        } else {
+          html += `<div class="pr-pending">ยังไม่มีผล</div>`;
+        }
+      });
+      html += `</div>`;
+    });
+    document.getElementById("printReport").innerHTML = html;
+  }
+
+  document.getElementById("printBtn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("printBtn");
+    const originalLabel = btn.innerHTML;
+    btn.classList.add("pdf-busy");
+    btn.innerHTML = "กำลังสร้างไฟล์...";
+    buildPrintReport();
+    const el = document.getElementById("printReport");
+    try{
+      if(window.html2pdf){
+        await window.html2pdf()
+          .set({
+            margin: 0,
+            filename: "DPSCUP-2-score-report.pdf",
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+            pagebreak: { mode: ["css", "legacy"] }
+          })
+          .from(el)
+          .save();
+      } else {
+        // Fallback if the PDF library failed to load (e.g. offline)
+        window.print();
+      }
+    }catch(err){
+      showToast("สร้าง PDF ไม่สำเร็จ ลองใหม่อีกครั้ง");
+    }
+    btn.classList.remove("pdf-busy");
+    btn.innerHTML = originalLabel;
+  });
+
+  // ---------- Init ----------
+  function pickInitialDay(){
+    const now = new Date();
+    const sat0 = new Date("2026-09-12T00:00:00+07:00");
+    const sun0 = new Date("2026-09-13T00:00:00+07:00");
+    const mon0 = new Date("2026-09-14T00:00:00+07:00");
+    if(now >= sat0 && now < sun0) return "sat";
+    if(now >= sun0) return "sun";
+    return "fri";
+  }
+  (function markToday(){
+    const today = pickInitialDay();
+    document.querySelectorAll("#dayTabs button").forEach(b=>{
+      if(b.dataset.day === today && today !== "fri"){
+        b.querySelector(".d").insertAdjacentHTML("beforeend", '<span class="todaymark"></span>');
+      }
+    });
+  })();
+
+  setActiveDay(pickInitialDay());
+  render();
+  loadScores();
+  setInterval(renderNextLine, 30000);
+
+})();
+</script>
+<script>
+(function(){
+  const pin = window.DPSCUP_ADMIN_PIN || "";
+  const gate = document.getElementById("adminGate");
+  const input = document.getElementById("adminPin");
+  const btn = document.getElementById("adminEnter");
+  const err = document.getElementById("adminErr");
+  function unlock(){
+    if(!pin){ err.textContent="ยังไม่ได้ตั้งค่า DPSCUP_ADMIN_PIN"; return; }
+    if(input.value===pin){ gate.style.display="none"; sessionStorage.setItem("dpscup-admin-ok","1"); }
+    else err.textContent="รหัสไม่ถูกต้อง";
+  }
+  btn.onclick=unlock;
+  input.addEventListener("keydown",e=>{if(e.key==="Enter") unlock();});
+  if(sessionStorage.getItem("dpscup-admin-ok")==="1") gate.style.display="none";
+})();
+</script></body>
+</html>
