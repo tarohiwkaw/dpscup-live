@@ -181,6 +181,22 @@
   .pr-break{ text-align:center; font-size:11px; color:#999; margin:4mm 0; }
   .pdf-busy{ opacity:0.6; pointer-events:none; }
 
+
+  /* Native browser print — reliable on iPad/iPhone Safari */
+  @media print{
+    @page{ size:A4; margin:0; }
+    html,body{ background:#fff !important; margin:0 !important; padding:0 !important; }
+    body > *:not(#printReport){ display:none !important; }
+    #printReport{
+      display:block !important; visibility:visible !important; opacity:1 !important;
+      position:static !important; width:210mm !important; min-height:297mm !important;
+      margin:0 !important; background:#fff !important; color:#111 !important;
+      z-index:auto !important; pointer-events:auto !important;
+    }
+    .pr-day{ page-break-after:always !important; break-after:page !important; }
+    .pr-day:last-child{ page-break-after:auto !important; break-after:auto !important; }
+  }
+
   #adminGate{position:fixed;inset:0;background:rgba(10,21,34,.97);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
   #adminBox{width:min(420px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;padding:22px}
   #adminBox h2{margin:0 0 8px;font-family:'Chakra Petch',sans-serif}
@@ -650,45 +666,43 @@
     const btn = document.getElementById("printBtn");
     const originalLabel = btn.innerHTML;
     btn.classList.add("pdf-busy");
-    btn.innerHTML = "กำลังสร้างไฟล์...";
+    btn.innerHTML = "กำลังเตรียมพิมพ์...";
     buildPrintReport();
+
     const el = document.getElementById("printReport");
-    // html2canvas/iOS can produce a blank PDF when the capture target is hidden,
-    // transparent, or behind the page. Make the report a real visible layer only
-    // for the duration of the capture, then restore the normal UI.
     el.style.display = "block";
     el.style.visibility = "visible";
     el.style.opacity = "1";
     el.style.zIndex = "99999";
+
+    // ใช้ระบบ Print ของ Safari โดยตรง แทน html2pdf
+    // เพราะบน iPad/iPhone html2pdf อาจสร้าง PDF ว่างได้
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    try{
-      if(window.html2pdf){
-        await window.html2pdf()
-          .set({
-            margin: 0,
-            filename: "DPSCUP-2-score-report.pdf",
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-            pagebreak: { mode: ["css", "legacy"] }
-          })
-          .from(el)
-          .save();
-      } else {
-        // Fallback if the PDF library failed to load (e.g. offline)
-        window.print();
-      }
-    }catch(err){
-      console.error("PDF error:", err);
-      showToast("สร้าง PDF ไม่สำเร็จ ลองใหม่อีกครั้ง");
-    } finally {
+
+    let restored = false;
+    const restore = () => {
+      if(restored) return;
+      restored = true;
       el.style.display = "none";
       el.style.visibility = "hidden";
       el.style.opacity = "0";
       el.style.zIndex = "-1";
+      btn.classList.remove("pdf-busy");
+      btn.innerHTML = originalLabel;
+      window.removeEventListener("afterprint", restore);
+    };
+
+    window.addEventListener("afterprint", restore, {once:true});
+
+    try{
+      window.print();
+      // Safari บางเวอร์ชันไม่ยิง afterprint; คืน UI หลังจากเวลาพอให้ print sheet เปิด
+      setTimeout(restore, 3000);
+    }catch(err){
+      console.error("Print error:", err);
+      restore();
+      showToast("เปิดหน้าพิมพ์ไม่สำเร็จ ลองใหม่อีกครั้ง");
     }
-    btn.classList.remove("pdf-busy");
-    btn.innerHTML = originalLabel;
   });
 
   // ---------- Init ----------
