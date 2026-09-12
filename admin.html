@@ -5,7 +5,7 @@
 </style>
 <body><div id="adminGate"><div id="adminBox"><h2>🔐 เข้าสู่ระบบผู้ดูแล</h2><div style="color:#7185a3;font-size:12px;line-height:1.6;margin-top:6px">เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น</div><input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username"><input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"><button id="adminEnter">เข้าสู่ระบบ</button><div id="adminErr"></div></div></div><div class="wrap"><header class="hero"><div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div><h1 class="title">DPSCUP <span class="no">ADMIN</span></h1><div class="eyebrow">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">🔐 แอดมินเท่านั้น</div><div class="toolbar"><button class="primary" id="printBtn">🖨️ พิมพ์ / บันทึก PDF</button><button id="logoutBtn">ออกจากระบบ</button></div><div class="next-line" id="nextLine"><span class="dot"></span><span id="nextText">กำลังโหลด…</span></div></header><nav class="days" id="dayTabs"><button data-day="fri"><span class="d">ศุกร์ 11 ก.ย.</span><span class="sub">ผลการแข่งขัน</span></button><button data-day="sat"><span class="d">เสาร์ 12 ก.ย.</span><span class="sub">รอบเช้า–บ่าย</span></button><button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button></nav>
 <section class="summary-admin"><div class="summary-admin-head"><h2>🏆 สรุปผลการแข่งขัน</h2><span style="font-size:10px;color:#91a2b8">แยกรุ่น ม.ต้น / ม.ปลาย</span></div><div style="padding:14px 15px 0;color:var(--navy);font-weight:700;font-size:13px">🔵 ม.ต้น</div><div class="summary-form"><div class="summary-field"><label>🥇 แชมป์ ม.ต้น<input id="sumChampionMinor" placeholder="ชื่อทีมแชมป์ ม.ต้น"></label></div><div class="summary-field"><label>🥈 รองแชมป์ ม.ต้น<input id="sumRunnerMinor" placeholder="ชื่อทีมรองแชมป์ ม.ต้น"></label></div><div class="summary-field"><label>🥉 อันดับ 3 ม.ต้น<input id="sumThirdMinor" placeholder="ชื่อทีมอันดับ 3 ม.ต้น"></label></div><div class="summary-field"><label>⭐ นักเตะยอดเยี่ยม ม.ต้น<input id="sumBestPlayerMinor" placeholder="ชื่อผู้เล่น ม.ต้น"></label></div><div class="summary-field"><label>🧤 ผู้รักษาประตูยอดเยี่ยม ม.ต้น<input id="sumBestGoalkeeperMinor" placeholder="ชื่อผู้เล่น ม.ต้น"></label></div></div><div style="padding:4px 15px 0;color:var(--navy);font-weight:700;font-size:13px">🟣 ม.ปลาย</div><div class="summary-form"><div class="summary-field"><label>🥇 แชมป์ ม.ปลาย<input id="sumChampionSenior" placeholder="ชื่อทีมแชมป์ ม.ปลาย"></label></div><div class="summary-field"><label>🥈 รองแชมป์ ม.ปลาย<input id="sumRunnerSenior" placeholder="ชื่อทีมรองแชมป์ ม.ปลาย"></label></div><div class="summary-field"><label>🥉 อันดับ 3 ม.ปลาย<input id="sumThirdSenior" placeholder="ชื่อทีมอันดับ 3 ม.ปลาย"></label></div><div class="summary-field"><label>⭐ นักเตะยอดเยี่ยม ม.ปลาย<input id="sumBestPlayerSenior" placeholder="ชื่อผู้เล่น ม.ปลาย"></label></div><div class="summary-field"><label>🧤 ผู้รักษาประตูยอดเยี่ยม ม.ปลาย<input id="sumBestGoalkeeperSenior" placeholder="ชื่อผู้เล่น ม.ปลาย"></label></div></div><div class="summary-save-row"><button id="summarySave">💾 บันทึกสรุปผลทั้ง 2 รุ่น</button></div><div class="summary-preview" id="summaryPreviewAdmin"></div></section>
-<section class="reports-panel"><div class="reports-head"><h2>🛠️ รายงานปัญหาจากผู้ชม <span class="reports-count" id="reportsCount">0</span></h2><button class="report-add" id="adminReportAdd">＋ เพิ่มรายงาน</button></div><div id="reportsList"><div style="padding:15px;color:#91a2b8;font-size:11px">กำลังรอข้อมูลรายงาน…</div></div></section>
+<section class="reports-panel"><div class="reports-head"><h2>🛠️ รายงานปัญหาจากผู้ชม <span class="reports-count" id="reportsCount">0</span><span id="reportsLive" style="font-size:9px;color:#2aa96b;margin-left:6px">● ออนไลน์</span></h2><button class="report-add" id="adminReportAdd">＋ เพิ่มรายงาน</button></div><div id="reportsList"><div style="padding:15px;color:#91a2b8;font-size:11px">กำลังรอข้อมูลรายงาน…</div></div></section>
 <div class="top-admin" id="topAdmin"></div><section class="day" id="day-fri"></section><section class="day" id="day-sat"></section><section class="day" id="day-sun"></section><footer>ข้อมูลสกอร์และรายงานเชื่อมกับ Firebase แบบเรียลไทม์ · หน้า Admin นี้สำหรับทีมงานเท่านั้น</footer></div><div class="toast" id="toast"></div><div class="admin-report-modal" id="adminReportModal"><div class="admin-report-box"><h3>🛠️ เพิ่มรายงานปัญหา</h3><label>ชื่อผู้แจ้ง<input id="adminReportName" placeholder="เช่น ทีมงาน / ผู้ชม"></label><label>ประเภท<select id="adminReportType"><option>⚽ สกอร์ผิด</option><option>👤 ชื่อผู้ทำประตูผิด</option><option>📱 การแสดงผลผิดปกติ</option><option>🐛 เว็บไซต์มีปัญหา</option><option>📣 อื่น ๆ</option></select></label><label>รายละเอียด<textarea id="adminReportDetail" placeholder="รายละเอียดปัญหา..."></textarea></label><div class="admin-report-actions"><button id="adminReportCancel">ยกเลิก</button><button class="save" id="adminReportSave">บันทึกรายงาน</button></div></div></div><div id="printReport"></div>
 <script>
 (function(){
@@ -20,33 +20,33 @@
       goals:[{team:"a", scorer:"ฮานีฟ (โล้น)"},{team:"a", scorer:"ฮานีฟ (โล้น)"},{team:"a", scorer:"ฮานีฟ (โล้น)"}]},
     {id:"fri-3", day:"fri", group:"ม.ต้น", time:"17:10", a:"HUFFAZ WORRIORS FC", b:"VORTEX", final:true,
       goals:[{team:"b", scorer:"อัรฟาริส"},{team:"b", scorer:"รุชดาน"},{team:"b", scorer:"อัรฮาม"}]},
-    {id:"fri-4", day:"fri", group:"ม.ปลาย", time:"17:30", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด", final:true,
+    {id:"fri-4", day:"fri", group:"ม.ต้น", time:"17:30", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด", final:true,
       goals:[{team:"a", scorer:"ฟารุก"}]},
 
-    {id:"sat-0",  day:"sat", start:"2026-09-12T07:00:00+07:00", end:"2026-09-12T07:20:00+07:00", time:"07:00", a:"บูเดาะบูล่ะห์", b:"ลุงโชเล่ X ปูดอง"},
-    {id:"sat-0b", day:"sat", start:"2026-09-12T07:20:00+07:00", end:"2026-09-12T07:40:00+07:00", time:"07:20", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ซีเครท"},
-    {id:"sat-1",  day:"sat", start:"2026-09-12T08:20:00+07:00", end:"2026-09-12T08:40:00+07:00", time:"08:20", a:"DARK RAVENS X VORTEX", b:"อาหรับน้อยร้อยลีลา"},
-    {id:"sat-2",  day:"sat", start:"2026-09-12T08:40:00+07:00", end:"2026-09-12T09:00:00+07:00", time:"08:40", a:"ลูกชายคนโต X TWO โล้น", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
-    {id:"sat-3",  day:"sat", start:"2026-09-12T09:00:00+07:00", end:"2026-09-12T09:20:00+07:00", time:"09:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"Dewan G.20"},
-    {id:"sat-4",  day:"sat", start:"2026-09-12T09:20:00+07:00", end:"2026-09-12T09:40:00+07:00", time:"09:20", a:"TSP รุ่นที่ 4 ACADEMY 1", b:"ชาคริต X น้องกา"},
-    {id:"sat-5",  day:"sat", start:"2026-09-12T09:40:00+07:00", end:"2026-09-12T10:00:00+07:00", time:"09:40", a:"น้องใหม่ X Q-CHANGE", b:"ทีมงาน X อาเซียน"},
-    {id:"sat-6",  day:"sat", start:"2026-09-12T10:00:00+07:00", end:"2026-09-12T10:20:00+07:00", time:"10:00", a:"วัยรุ่นสายฮา X ทีเด็ด", b:"วัยรุ่นสายฮา X ซีเครท"},
-    {id:"sat-7",  day:"sat", start:"2026-09-12T10:20:00+07:00", end:"2026-09-12T10:40:00+07:00", time:"10:20", a:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", b:"อาหรับน้อยร้อยลีลา"},
-    {id:"sat-8",  day:"sat", start:"2026-09-12T10:40:00+07:00", end:"2026-09-12T11:00:00+07:00", time:"10:40", a:"เสืออ้วน X YIYA KATONG", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
-    {id:"sat-9",  day:"sat", start:"2026-09-12T11:00:00+07:00", end:"2026-09-12T11:20:00+07:00", time:"11:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ซีเครท"},
-    {id:"sat-10", day:"sat", start:"2026-09-12T11:20:00+07:00", end:"2026-09-12T11:40:00+07:00", time:"11:20", a:"HUFFAZ WORRIORS FC", b:"TSP รุ่นที่ 4 ACADEMY 1"},
-    {id:"sat-break", day:"sat", isBreak:true, time:"11:40 – 13:20", label:"พักเที่ยง และพักละหมาด",
+    {id:"sat-0",  day:"sat", group:"ม.ต้น", start:"2026-09-12T07:00:00+07:00", end:"2026-09-12T07:20:00+07:00", time:"07:00", a:"บูเดาะบูล่ะห์", b:"ลุงโชเล่ X ปูดอง"},
+    {id:"sat-0b", day:"sat", group:"ม.ต้น", start:"2026-09-12T07:20:00+07:00", end:"2026-09-12T07:40:00+07:00", time:"07:20", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ซีเครท"},
+    {id:"sat-1",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:20:00+07:00", end:"2026-09-12T08:40:00+07:00", time:"08:20", a:"DARK RAVENS X VORTEX", b:"อาหรับน้อยร้อยลีลา"},
+    {id:"sat-2",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:40:00+07:00", end:"2026-09-12T09:00:00+07:00", time:"08:40", a:"ลูกชายคนโต X TWO โล้น", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
+    {id:"sat-3",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:00:00+07:00", end:"2026-09-12T09:20:00+07:00", time:"09:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"Dewan G.20"},
+    {id:"sat-4",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:20:00+07:00", end:"2026-09-12T09:40:00+07:00", time:"09:20", a:"TSP รุ่นที่ 4 ACADEMY 1", b:"ชาคริต X น้องกา"},
+    {id:"sat-5",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:40:00+07:00", end:"2026-09-12T10:00:00+07:00", time:"09:40", a:"น้องใหม่ X Q-CHANGE", b:"ทีมงาน X อาเซียน"},
+    {id:"sat-6",  day:"sat", group:"ม.ต้น", start:"2026-09-12T10:00:00+07:00", end:"2026-09-12T10:20:00+07:00", time:"10:00", a:"วัยรุ่นสายฮา X ทีเด็ด", b:"วัยรุ่นสายฮา X ซีเครท"},
+    {id:"sat-7",  day:"sat", group:"ม.ต้น", start:"2026-09-12T10:20:00+07:00", end:"2026-09-12T10:40:00+07:00", time:"10:20", a:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", b:"อาหรับน้อยร้อยลีลา"},
+    {id:"sat-8",  day:"sat", group:"ม.ต้น", start:"2026-09-12T10:40:00+07:00", end:"2026-09-12T11:00:00+07:00", time:"10:40", a:"เสืออ้วน X YIYA KATONG", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
+    {id:"sat-9",  day:"sat", group:"ม.ต้น", start:"2026-09-12T11:00:00+07:00", end:"2026-09-12T11:20:00+07:00", time:"11:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ซีเครท"},
+    {id:"sat-10", day:"sat", group:"ม.ต้น", start:"2026-09-12T11:20:00+07:00", end:"2026-09-12T11:40:00+07:00", time:"11:20", a:"HUFFAZ WORRIORS FC", b:"TSP รุ่นที่ 4 ACADEMY 1"},
+    {id:"sat-break", day:"sat", group:"ม.ต้น", isBreak:true, time:"11:40 – 13:20", label:"พักเที่ยง และพักละหมาด",
       start:"2026-09-12T11:40:00+07:00", end:"2026-09-12T13:20:00+07:00"},
-    {id:"sat-11", day:"sat", start:"2026-09-12T13:20:00+07:00", end:"2026-09-12T13:40:00+07:00", time:"13:20", a:"บูเดาะบูล่ะห์", b:"น้องใหม่ X Q-CHANGE"},
-    {id:"sat-12", day:"sat", start:"2026-09-12T13:40:00+07:00", end:"2026-09-12T14:00:00+07:00", time:"13:40", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ทีเด็ด"},
-    {id:"sat-13", day:"sat", start:"2026-09-12T14:00:00+07:00", end:"2026-09-12T14:20:00+07:00", time:"14:00", a:"VORTEX", b:"ชาคริต X น้องกา"},
-    {id:"sat-14", day:"sat", start:"2026-09-12T14:20:00+07:00", end:"2026-09-12T14:40:00+07:00", time:"14:20", a:"ลุงโชเล่ X ปูดอง", b:"ทีมงาน X อาเซียน"},
-    {id:"sat-15", day:"sat", start:"2026-09-12T14:40:00+07:00", end:"2026-09-12T15:00:00+07:00", time:"14:40", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด"},
-    {id:"sat-16", day:"sat", start:"2026-09-12T15:00:00+07:00", end:"2026-09-12T15:20:00+07:00", time:"15:00", a:"HUFFAZ WORRIORS FC", b:"ชาคริต X น้องกา"},
+    {id:"sat-11", day:"sat", group:"ม.ต้น", start:"2026-09-12T13:20:00+07:00", end:"2026-09-12T13:40:00+07:00", time:"13:20", a:"บูเดาะบูล่ะห์", b:"น้องใหม่ X Q-CHANGE"},
+    {id:"sat-12", day:"sat", group:"ม.ต้น", start:"2026-09-12T13:40:00+07:00", end:"2026-09-12T14:00:00+07:00", time:"13:40", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ทีเด็ด"},
+    {id:"sat-13", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:00:00+07:00", end:"2026-09-12T14:20:00+07:00", time:"14:00", a:"VORTEX", b:"ชาคริต X น้องกา"},
+    {id:"sat-14", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:20:00+07:00", end:"2026-09-12T14:40:00+07:00", time:"14:20", a:"ลุงโชเล่ X ปูดอง", b:"ทีมงาน X อาเซียน"},
+    {id:"sat-15", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:40:00+07:00", end:"2026-09-12T15:00:00+07:00", time:"14:40", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด"},
+    {id:"sat-16", day:"sat", group:"ม.ต้น", start:"2026-09-12T15:00:00+07:00", end:"2026-09-12T15:20:00+07:00", time:"15:00", a:"HUFFAZ WORRIORS FC", b:"ชาคริต X น้องกา"},
 
-    {id:"sun-1", day:"sun", start:"2026-09-13T08:30:00+07:00", end:"2026-09-13T08:50:00+07:00", time:"08:30", a:"บูเดาะบูล่ะห์", b:"ทีมงาน X อาเซียน"},
-    {id:"sun-2", day:"sun", start:"2026-09-13T08:50:00+07:00", end:"2026-09-13T09:10:00+07:00", time:"08:50", a:"VORTEX", b:"TSP รุ่นที่ 4 ACADEMY 1"},
-    {id:"sun-3", day:"sun", start:"2026-09-13T09:10:00+07:00", end:"2026-09-13T09:30:00+07:00", time:"09:10", a:"ลุงโชเล่ X ปูดอง", b:"น้องใหม่ X Q-CHANGE"},
+    {id:"sun-1", day:"sun", group:"ม.ต้น", start:"2026-09-13T08:30:00+07:00", end:"2026-09-13T08:50:00+07:00", time:"08:30", a:"บูเดาะบูล่ะห์", b:"ทีมงาน X อาเซียน"},
+    {id:"sun-2", day:"sun", group:"ม.ต้น", start:"2026-09-13T08:50:00+07:00", end:"2026-09-13T09:10:00+07:00", time:"08:50", a:"VORTEX", b:"TSP รุ่นที่ 4 ACADEMY 1"},
+    {id:"sun-3", day:"sun", group:"ม.ต้น", start:"2026-09-13T09:10:00+07:00", end:"2026-09-13T09:30:00+07:00", time:"09:10", a:"ลุงโชเล่ X ปูดอง", b:"น้องใหม่ X Q-CHANGE"},
   ];
 
   const STORAGE_KEY = "dpscup-2-scores";
@@ -579,6 +579,7 @@
   const summaryFields={championMinor:'sumChampionMinor',runnerMinor:'sumRunnerMinor',thirdMinor:'sumThirdMinor',bestPlayerMinor:'sumBestPlayerMinor',bestGoalkeeperMinor:'sumBestGoalkeeperMinor',championSenior:'sumChampionSenior',runnerSenior:'sumRunnerSenior',thirdSenior:'sumThirdSenior',bestPlayerSenior:'sumBestPlayerSenior',bestGoalkeeperSenior:'sumBestGoalkeeperSenior'};
   function loadAdminSummary(){
     try{
+      if(!firebase.apps.length) firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);
       summaryRef=firebase.database().ref(SUMMARY_KEY);
       summaryRef.on('value',snap=>{const v=snap.val()||{}; Object.entries(summaryFields).forEach(([k,id])=>{const el=document.getElementById(id); if(el) el.value=v[k]||'';}); renderAdminSummaryPreview(v);});
     }catch(e){console.error(e);}
@@ -596,6 +597,7 @@
 
   // ---------- Admin issue reports ----------
   let reportsRef = null;
+  let reportsListenerAttached = false;
   function escReport(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
   function fmtReportTime(ts){
     if(!ts) return 'เพิ่งส่ง';
@@ -617,8 +619,11 @@
   function initReports(){
     try{
       if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){
+        if(!firebase.apps.length) firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);
         reportsRef=firebase.database().ref(REPORTS_KEY);
-        reportsRef.on('value',renderReports,err=>{console.error(err);document.getElementById('reportsList').innerHTML='<div style="padding:14px;color:#ff9b9b;font-size:11px">อ่านรายงานไม่ได้ · ตรวจ Firebase Rules</div>';});
+        if(reportsListenerAttached) reportsRef.off('value', renderReports);
+        reportsRef.on('value',renderReports,err=>{console.error(err);document.getElementById('reportsList').innerHTML='<div style="padding:14px;color:#c72f3d;font-size:11px">อ่านรายงานไม่ได้ · ตรวจ Firebase Rules และตรวจว่าแอดมินล็อกอินอยู่</div>';});
+        reportsListenerAttached=true;
       }
     }catch(e){console.error(e);}
   }

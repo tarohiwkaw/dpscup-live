@@ -1,17 +1,9 @@
-DPSCUP v17 — DPSPN White/Blue Premium
+DPSCUP v20
 
-Files:
-- index.html public live score
-- admin.html admin score control + issue reports + tournament summary editor + PDF
-- summary.html separate public tournament summary page
-- dpspn-logo.png DPSPN logo
+ไฟล์หลัก: index.html, admin.html, summary.html, dpspn-logo.png
+เก็บ firebase-config.js เดิมไว้ใน GitHub
 
-Firebase paths:
-- dpscup-2-scores (existing)
-- dpscup-2-reports
-- dpscup-2-summary
-
-Recommended Realtime Database Rules:
+Firebase Realtime Database Rules:
 {
   "rules": {
     "dpscup-2-scores": { ".read": true, ".write": "auth != null" },
@@ -19,3 +11,5 @@ Recommended Realtime Database Rules:
     "dpscup-2-summary": { ".read": true, ".write": "auth != null" }
   }
 }
+
+ข้อมูลทีมในตารางการแข่งขันชุดปัจจุบันตามที่ผู้ใช้ระบุเป็น ม.ต้น ทั้งหมด จึงกำหนด group="ม.ต้น" ให้ทุกคู่ที่มีอยู่ในตาราง เพื่อให้ดาวซัลโวแยกถูกต้อง ไม่ตกไปอยู่ใน "ไม่ระบุรุ่น". ช่องสรุป ม.ปลายยังคงมีไว้สำหรับกรอกผลของ ม.ปลายเมื่อมีข้อมูล.
