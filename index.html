@@ -154,6 +154,26 @@
 
   footer{ text-align:center; color:var(--ink-dimmer); font-size:11px; margin-top:26px; padding:0 16px; line-height:1.7; }
 
+  /* ---------- Logo / accordion / issue report ---------- */
+  .brand-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .brand-logo{width:54px;height:54px;border-radius:14px;object-fit:cover;background:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .brand-copy{min-width:0}.brand-copy strong{display:block;font-family:'Chakra Petch';font-size:18px;letter-spacing:.04em}.brand-copy span{display:block;font-size:10px;color:var(--ink-dim);margin-top:2px}
+  .accordion{border:1px solid rgba(73,154,255,.28);border-radius:14px;overflow:hidden;background:linear-gradient(145deg,#10243c,#0c1b2b);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+  .accordion summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:13px;background:linear-gradient(90deg,rgba(24,103,209,.20),transparent)}
+  .accordion summary::-webkit-details-marker{display:none}.accordion summary .chev{margin-left:auto;transition:transform .2s;color:#9bc9ff}.accordion[open] summary .chev{transform:rotate(180deg)}
+  .accordion-note{font-size:10px;color:var(--ink-dimmer);font-weight:400;margin-left:auto;margin-right:4px}
+  .accordion-body{border-top:1px solid var(--line)}
+  .quick-links{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+  .quick-link{display:flex;align-items:center;gap:8px;padding:10px 11px;border:1px solid var(--line-strong);border-radius:11px;background:var(--panel);color:var(--ink);text-decoration:none;font-size:11px}
+  .quick-link small{display:block;color:var(--ink-dim);font-size:9px}.quick-link:hover{border-color:rgba(73,154,255,.55)}
+  .issue-btn{width:100%;margin-top:10px;padding:11px 13px;border-radius:11px;border:1px solid rgba(225,82,82,.45);background:rgba(225,82,82,.10);color:#ff9b9b;font-family:'Prompt';font-size:12px;font-weight:600;cursor:pointer}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,8,15,.78);backdrop-filter:blur(7px);display:none;align-items:flex-end;justify-content:center;z-index:100;padding:14px}
+  .modal-backdrop.show{display:flex}.issue-modal{width:min(600px,100%);max-height:88vh;overflow:auto;background:#10233a;border:1px solid var(--line-strong);border-radius:18px;padding:16px;box-shadow:0 25px 70px rgba(0,0,0,.45)}
+  .issue-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.issue-head h3{margin:0;font-family:'Chakra Petch';font-size:20px}.issue-close{border:0;background:none;color:var(--ink-dim);font-size:24px;cursor:pointer}
+  .issue-form{display:grid;gap:10px;margin-top:13px}.issue-form label{font-size:11px;color:var(--ink-dim)}.issue-form input,.issue-form select,.issue-form textarea{width:100%;margin-top:5px;background:#0a1522;color:var(--ink);border:1px solid var(--line-strong);border-radius:9px;padding:10px;font-family:'Prompt';font-size:16px}.issue-form textarea{min-height:105px;resize:vertical}
+  .issue-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}.issue-actions button{padding:10px;border-radius:9px;border:1px solid var(--line-strong);font-family:'Prompt';font-weight:600;cursor:pointer;background:var(--panel);color:var(--ink)}.issue-actions .send{background:#1769d5;border-color:#3288f4}
+  @media(max-width:420px){.quick-links{grid-template-columns:1fr}.accordion-note{display:none}}
+
   /* ---------- Print report (rendered off-screen, captured to PDF) ---------- */
   #printReport{
     position:fixed; top:0; left:0; width:210mm; background:#fff; color:#111; z-index:-1; opacity:0.01;
@@ -197,6 +217,10 @@
 
 <div class="wrap">
   <header class="hero">
+    <div class="brand-top">
+      <img class="brand-logo" src="dpspn-logo.jpg" alt="DPSPN logo">
+      <div class="brand-copy"><strong>DPSPN</strong><span>Dewan Pelajar Sekolah Piraya Nawin · GENERASI 20</span></div>
+    </div>
     <div class="eyebrow">DPSPN · การแข่งขันฟุตบอลภายในโรงเรียน 26/27</div>
     <h1 class="title">DPSCUP <span class="no">ครั้งที่ 2</span></h1>
     <div class="brand-line"><div class="eyebrow">DPSPN · FOOTBALL TOURNAMENT 2026</div><div class="brand-badge">LIVE SCORE</div></div>
@@ -227,8 +251,17 @@
     <button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button>
   </nav>
 
-  <div class="section-head"><h2>👑 TOP SCORERS</h2><span>อัปเดตจากผลการแข่งขัน</span></div>
-  <div class="scorers-box" id="topScorers"><div class="empty-scorers">กำลังโหลดข้อมูลดาวซัลโว…</div></div>
+  <div class="section-head"><h2>📊 ศูนย์สถิติ</h2><span>ข้อมูลจากการแข่งขันจริง</span></div>
+  <details class="accordion" id="scorersAccordion">
+    <summary><span>👑 ดาวซัลโว (TOP SCORERS)</span><span class="accordion-note">กดเพื่อเปิด/ปิด</span><span class="chev">⌄</span></summary>
+    <div class="accordion-body"><div class="scorers-box" id="topScorers"><div class="empty-scorers">กำลังโหลดข้อมูลดาวซัลโว…</div></div></div>
+  </details>
+
+  <div class="quick-links">
+    <a class="quick-link" href="https://www.instagram.com/dewanpiraya.official/" target="_blank" rel="noopener">📸 <span><b>Instagram</b><small>@dewanpiraya.official</small></span></a>
+    <a class="quick-link" href="https://www.facebook.com/profile.php?id=61556339787704" target="_blank" rel="noopener">📘 <span><b>Facebook</b><small>Dewan Piraya Official</small></span></a>
+  </div>
+  <button class="issue-btn" id="issueOpen">🛠️ รายงานปัญหา / แจ้งสกอร์ผิด</button>
 
   <section class="day" id="day-fri"></section>
   <section class="day" id="day-sat"></section>
@@ -240,6 +273,19 @@
   </footer>
 </div>
 
+<div class="modal-backdrop" id="issueModal">
+  <div class="issue-modal" role="dialog" aria-modal="true" aria-labelledby="issueTitle">
+    <div class="issue-head"><h3 id="issueTitle">🛠️ รายงานปัญหา</h3><button class="issue-close" id="issueClose" aria-label="ปิด">×</button></div>
+    <div class="issue-form">
+      <label>ชื่อผู้แจ้ง (ไม่กรอกก็ได้)<input id="issueName" placeholder="ชื่อเล่น / ชื่อผู้แจ้ง"></label>
+      <label>ประเภทปัญหา<select id="issueType"><option>⚽ สกอร์ผิด</option><option>👤 ชื่อผู้ทำประตูผิด</option><option>📱 การแสดงผลผิดปกติ</option><option>🐛 เว็บไซต์มีปัญหา</option><option>📣 อื่น ๆ</option></select></label>
+      <label>รายละเอียด<textarea id="issueDetail" placeholder="เช่น เกมที่ 3 สกอร์ควรเป็น 2–1 หรือชื่อผู้ยิงสะกดผิด..."></textarea></label>
+      <div class="issue-actions"><button id="issueCopy">📋 คัดลอกรายงาน</button><button class="send" id="issueFacebook">📘 เปิด Facebook</button></div>
+      <a class="quick-link" href="https://www.instagram.com/dewanpiraya.official/" target="_blank" rel="noopener">📸 เปิด Instagram เพื่อแจ้งปัญหา</a>
+      <div style="font-size:10px;color:var(--ink-dimmer);line-height:1.6">ระบบจะเตรียมข้อความรายงานให้ก่อน จากนั้นกดคัดลอกแล้วส่งให้ทีมงานผ่าน Facebook หรือ Instagram</div>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div id="printReport"></div>
 
@@ -615,6 +661,31 @@
     }
     btn.classList.remove("pdf-busy");
     btn.innerHTML = originalLabel;
+  });
+
+  // ---------- Issue report ----------
+  const issueModal=document.getElementById('issueModal');
+  const issueOpen=document.getElementById('issueOpen');
+  const issueClose=document.getElementById('issueClose');
+  function issueText(){
+    const name=(document.getElementById('issueName').value||'ไม่ระบุชื่อ').trim();
+    const type=document.getElementById('issueType').value;
+    const detail=(document.getElementById('issueDetail').value||'').trim();
+    return `DPSCUP — รายงานปัญหา\nผู้แจ้ง: ${name}\nประเภท: ${type}\nรายละเอียด: ${detail||'ไม่ได้ระบุ'}\nหน้าเว็บ: ${location.href}`;
+  }
+  issueOpen?.addEventListener('click',()=>issueModal?.classList.add('show'));
+  issueClose?.addEventListener('click',()=>issueModal?.classList.remove('show'));
+  issueModal?.addEventListener('click',e=>{if(e.target===issueModal) issueModal.classList.remove('show');});
+  document.getElementById('issueCopy')?.addEventListener('click',async()=>{
+    const text=issueText();
+    try{await navigator.clipboard.writeText(text);showToast('คัดลอกรายงานแล้ว · นำไปส่งให้ทีมงานได้เลย');}
+    catch(e){window.prompt('คัดลอกรายงานนี้:',text);}
+  });
+  document.getElementById('issueFacebook')?.addEventListener('click',async()=>{
+    const text=issueText();
+    try{await navigator.clipboard.writeText(text);showToast('คัดลอกรายงานแล้ว · กำลังเปิด Facebook');}
+    catch(e){}
+    window.open('https://www.facebook.com/profile.php?id=61556339787704','_blank','noopener');
   });
 
   // ---------- Init ----------

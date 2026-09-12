@@ -1,8 +1,6 @@
-# DPSCUP Live v12 — Premium UI + Top Scorers
-
-- Refreshed public viewer UI with premium tournament styling.
-- Added live stats and automatic Top Scorers leaderboard.
-- Added Top Scorers to PDF report.
-- Admin page refreshed with admin dashboard stats and Top Scorers.
-- Firebase config is intentionally not included; keep the existing `firebase-config.js`.
-- Replacing these HTML files does not delete Firebase data.
+DPSCUP Live v13
+- Premium DPSPN dark theme
+- DPSPN logo included as dpspn-logo.jpg
+- Collapsible Top Scorers
+- Issue report form with Facebook/Instagram contact links
+- Existing Firebase data/config are preserved when you replace index.html and keep firebase-config.js.
