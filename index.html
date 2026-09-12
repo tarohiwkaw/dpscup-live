@@ -324,8 +324,11 @@
     return {a,b,steps};
   }
   function currentResult(m){
-    if(m.final) return {mode:"goals", ...scoreFromGoals(m.goals)};
     const rep = reported[m.id];
+
+    // Pre-filled matches use their original result until an admin edits them.
+    if(!rep && m.final) return {mode:"goals", ...scoreFromGoals(m.goals)};
+
     if(!rep) return null;
     if(rep.mode==="manual") return {mode:"manual", a:rep.scoreA, b:rep.scoreB, steps:[]};
     return {mode:"goals", ...scoreFromGoals(rep.goals || [])};
@@ -356,9 +359,9 @@
     }
 
     let actionHtml = "";
-    if(!m.final){
+    {
       const rep = reported[m.id];
-      actionHtml = `<div class="m-action"><button data-toggle="${m.id}">${rep ? "แก้ไขผล" : "+ รายงานผล / ผู้ทำประตู"}</button></div>
+      actionHtml = `<div class="m-action"><button data-toggle="${m.id}">${rep ? "แก้ไขผล" : (m.final ? "แก้ไขผลการแข่งขัน" : "+ รายงานผล / ผู้ทำประตู")}</button></div>
         ${panelHtml(m)}`;
     }
 
