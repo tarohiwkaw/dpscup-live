@@ -1,34 +1,23 @@
-DPSCUP v24 — ADMIN UX
+# DPSCUP 2026 — Final v29
 
-ปรับฝั่ง Admin ให้ใช้งานง่ายบน iPad โดยเน้น 4 เมนูหลัก:
-- ⚽ การแข่งขัน — แก้สกอร์และผู้ทำประตูในหน้าการ์ดเดียว
-- ⚠️ รายงาน — เห็นจำนวนรายงานใหม่บนเมนู และจัดการสถานะรายงานได้
-- 🏆 สรุปผล — กรอกผลรางวัล ม.ต้น / ม.ปลาย แยกกัน
-- 🗺️ ผังการแข่งขัน — จัดสาย ม.ปลาย
+ไฟล์ชุดรวมสำหรับ GitHub Pages
 
-เพิ่มตัวเลือก 🔵 ม.ต้น / 🟣 ม.ปลาย ใน Admin และไม่แสดงตารางแข่ง ม.ปลายที่ยังไม่มีข้อมูลแทนการสร้างข้อมูลมั่วขึ้นมา
+## อัปโหลด/แทนที่ไฟล์
+- index.html
+- admin.html
+- summary.html
+- bracket.html
+- dpspn-logo.png
 
-การแก้ข้อมูลการแข่งขันใช้การบันทึกทีละแมตช์ (`dpscup-2-scores/<matchId>`) เพื่อช่วยลดโอกาสที่การแก้ไขของแมตช์หนึ่งจะไปทับแมตช์อื่น และรองรับการใช้งานหลายหน้าต่างได้ดีกว่าเดิม
+อย่าเปลี่ยน `firebase-config.js` ถ้าของเดิมเชื่อม Firebase dpscup-live อยู่แล้ว
 
-เพิ่มการรักษาโฟกัสของช่องกรอกข้อมูลเมื่อ Firebase ส่งข้อมูลเรียลไทม์ เพื่อไม่ให้ iPad เด้งออกจากช่องระหว่างพิมพ์
+## ไฟล์ซ้ำ
+ถ้ามี `index 3.html` หรือ `index 5.html` ไม่ต้องใช้ และลบออกจาก repo ได้เพื่อไม่ให้สับสน
 
-ไฟล์หลัก:
-- admin.html — Admin v24
-- index.html — หน้าเว็บผู้ชม
-- bracket.html — ผังการแข่งขัน
-- summary.html — หน้าสรุปผล
-- dpspn-logo.png — โลโก้
+## Firebase Rules
+`firebase-rules.json` เป็นกติกาที่รองรับระบบนี้:
+- scores: คนดูอ่านได้ / เฉพาะผู้ล็อกอินเขียนได้
+- summary: คนดูอ่านได้ / เฉพาะผู้ล็อกอินเขียนได้
+- reports: คนดูส่งรายงานได้ / เฉพาะผู้ล็อกอินอ่านและจัดการรายงานได้
 
-สำคัญ:
-- เก็บ `firebase-config.js` เดิมไว้
-- การแทนที่ไฟล์บน GitHub ไม่ลบข้อมูล Firebase ตราบใดที่ใช้โปรเจกต์ / database URL / STORAGE_KEY เดิม
-
-Firebase Rules ที่แนะนำ:
-{
-  "rules": {
-    "dpscup-2-scores": { ".read": true, ".write": "auth != null" },
-    "dpscup-2-summary": { ".read": true, ".write": "auth != null" },
-    "dpscup-bracket": { ".read": true, ".write": "auth != null" },
-    "dpscup-2-reports": { ".read": "auth != null", ".write": true }
-  }
-}
+ก่อนเปลี่ยน Rules ควร Export JSON จาก Realtime Database เพื่อสำรองข้อมูล

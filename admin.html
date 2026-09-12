@@ -43,7 +43,7 @@
   const MATCHES = [
     {id:"fri-1", day:"fri", group:"ม.ต้น", time:"16:30", a:"DARK RAVEN X VORTEX", b:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", final:true,
       goals:[{team:"b", scorer:"กิรติ", og:true}]},
-    {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO", b:"เสืออ้วน X YIYA KATONG", final:true,
+    {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO โล้น", b:"เสืออ้วน X YIYA KATONG", final:true,
       goals:[{team:"a", scorer:"ฮานีฟ"},{team:"a", scorer:"ฮานีฟ"},{team:"a", scorer:"ฮานีฟ"}]},
     {id:"fri-3", day:"fri", group:"ม.ต้น", time:"17:10", a:"HUFFAZ WORRIORS FC", b:"VORTEX", final:true,
       goals:[{team:"b", scorer:"อัรฟาริส"},{team:"b", scorer:"รุชดาน"},{team:"b", scorer:"อัรฮาม"}]},
@@ -53,7 +53,7 @@
     {id:"sat-0",  day:"sat", group:"ม.ต้น", start:"2026-09-12T07:00:00+07:00", end:"2026-09-12T07:20:00+07:00", time:"07:00", a:"บูเดาะบูล่ะห์", b:"ลุงโชเล่ X ปูดอง"},
     {id:"sat-0b", day:"sat", group:"ม.ต้น", start:"2026-09-12T07:20:00+07:00", end:"2026-09-12T07:40:00+07:00", time:"07:20", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ซีเครท"},
     {id:"sat-1",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:20:00+07:00", end:"2026-09-12T08:40:00+07:00", time:"08:20", a:"DARK RAVENS X VORTEX", b:"อาหรับน้อยร้อยลีลา"},
-    {id:"sat-2",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:40:00+07:00", end:"2026-09-12T09:00:00+07:00", time:"08:40", a:"ลูกชายคนโต X TWO", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
+    {id:"sat-2",  day:"sat", group:"ม.ต้น", start:"2026-09-12T08:40:00+07:00", end:"2026-09-12T09:00:00+07:00", time:"08:40", a:"ลูกชายคนโต X TWO โล้น", b:"บุรฮันสั่งลุย X อีเราะฮ์ฮอ"},
     {id:"sat-3",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:00:00+07:00", end:"2026-09-12T09:20:00+07:00", time:"09:00", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"Dewan G.20"},
     {id:"sat-4",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:20:00+07:00", end:"2026-09-12T09:40:00+07:00", time:"09:20", a:"TSP รุ่นที่ 4 ACADEMY 1", b:"ชาคริต X น้องกา"},
     {id:"sat-5",  day:"sat", group:"ม.ต้น", start:"2026-09-12T09:40:00+07:00", end:"2026-09-12T10:00:00+07:00", time:"09:40", a:"น้องใหม่ X Q-CHANGE", b:"ทีมงาน X อาเซียน"},
@@ -68,6 +68,7 @@
     {id:"sat-12", day:"sat", group:"ม.ต้น", start:"2026-09-12T13:40:00+07:00", end:"2026-09-12T14:00:00+07:00", time:"13:40", a:"Dewan G.20", b:"วัยรุ่นสายฮา X ทีเด็ด"},
     {id:"sat-13", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:00:00+07:00", end:"2026-09-12T14:20:00+07:00", time:"14:00", a:"VORTEX", b:"ชาคริต X น้องกา"},
     {id:"sat-14", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:20:00+07:00", end:"2026-09-12T14:40:00+07:00", time:"14:20", a:"ลุงโชเล่ X ปูดอง", b:"ทีมงาน X อาเซียน"},
+    {id:"sat-15", day:"sat", group:"ม.ต้น", start:"2026-09-12T14:40:00+07:00", end:"2026-09-12T15:00:00+07:00", time:"14:40", a:"ไม่ได้แชมป์ ไม่ขึ้นมัสยิด", b:"วัยรุ่นสายฮา X ทีเด็ด"},
     {id:"sat-16", day:"sat", group:"ม.ต้น", start:"2026-09-12T15:00:00+07:00", end:"2026-09-12T15:20:00+07:00", time:"15:00", a:"HUFFAZ WORRIORS FC", b:"ชาคริต X น้องกา"},
 
     {id:"sun-1", day:"sun", group:"ม.ต้น", start:"2026-09-13T08:30:00+07:00", end:"2026-09-13T08:50:00+07:00", time:"08:30", a:"บูเดาะบูล่ะห์", b:"ทีมงาน X อาเซียน"},
@@ -76,12 +77,11 @@
   ];
 
   // รุ่นการแข่งขัน: ทีม 4 ชุดนี้เป็น ม.ปลายตามรายชื่อที่เหลือจากผัง ม.ต้น
-  const SENIOR_MATCH_IDS = new Set(['fri-4','sat-0b','sat-3','sat-6','sat-9','sat-12']);
-  function getMatchGrade(m){ return SENIOR_MATCH_IDS.has(m.id) ? 'ม.ปลาย' : 'ม.ต้น'; }
+  const SENIOR_TEAMS = new Set(['ไม่ได้แชมป์ ไม่ขึ้นมัสยิด','วัยรุ่นสายฮา X ทีเด็ด','Dewan G.20','วัยรุ่นสายฮา X ซีเครท']);
+  function getMatchGrade(m){ return (SENIOR_TEAMS.has(m.a) && SENIOR_TEAMS.has(m.b)) ? 'ม.ปลาย' : 'ม.ต้น'; }
 
   const STORAGE_KEY = "dpscup-2-scores";
   const REPORTS_KEY = "dpscup-2-reports";
-  let activeAdminGrade = "ม.ต้น";
   let reported = {}; // { [id]: {mode:'goals', goals:[{team,scorer,og}]} | {mode:'manual', scoreA, scoreB} }
 
   // ---------- Realtime cloud storage ----------
@@ -204,7 +204,7 @@
   }
 
   function normalizeScorerName(name){
-    return String(name||"").replace(/\s*\(โล้น\)\s*/g, " ").replace(/คอยรุนอานาม/g, "คอยรุนอานาม").trim();
+    return String(name||"").replace(/\s*\(โล้น\)\s*/g, " ").replace(/คายรุนอานาม/g, "คอยรุนอานาม").trim();
   }
 
   function escapeHtml(s){
@@ -304,19 +304,27 @@
 
   function renderAdminStats(){
     const map=new Map(); let played=0,totalGoals=0;
-    MATCHES.forEach(m=>{if(m.isBreak || getMatchGrade(m)!==activeAdminGrade)return; const r=currentResult(m); if(!r)return; played++;
+    MATCHES.forEach(m=>{if(m.isBreak)return; const r=currentResult(m); if(!r)return; played++;
       if(r.mode==='goals'){ const gs=(reported[m.id]&&Array.isArray(reported[m.id].goals))?reported[m.id].goals:(m.final?m.goals:[]); gs.forEach(g=>{if(g.og)return; if(g.scorer){const scorerName=normalizeScorerName(g.scorer); if(!scorerName) return; const key=scorerName+'||'+(g.team==='a'?m.a:m.b); const x=map.get(key)||{name:scorerName,team:g.team==='a'?m.a:m.b,group:getMatchGrade(m),goals:0}; x.goals++;map.set(key,x);totalGoals++;}}); }
       else totalGoals+=Number(r.a||0)+Number(r.b||0);
     });
-    const e=id=>document.getElementById(id); if(e('aStatMatches'))e('aStatMatches').textContent=MATCHES.filter(m=>!m.isBreak && getMatchGrade(m)===activeAdminGrade).length; if(e('aStatPlayed'))e('aStatPlayed').textContent=played; if(e('aStatGoals'))e('aStatGoals').textContent=totalGoals;
+    const e=id=>document.getElementById(id); if(e('aStatMatches'))e('aStatMatches').textContent=MATCHES.filter(m=>!m.isBreak).length; if(e('aStatPlayed'))e('aStatPlayed').textContent=played; if(e('aStatGoals'))e('aStatGoals').textContent=totalGoals;
     const rows=Array.from(map.values()).sort((a,b)=>b.goals-a.goals).slice(0,5); const box=e('topAdmin'); if(!box)return;
     box.innerHTML='<div class="top-admin-title">👑 TOP SCORERS · จากข้อมูลที่บันทึกแล้ว</div>'+(rows.length?rows.map((r,i)=>`<div class="top-admin-row"><span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span><div><b>${escapeHtml(r.name)}</b><small>${escapeHtml(r.team)}</small></div><b>${r.goals}</b></div>`).join(''):'<div style="padding:10px;color:var(--ink-dimmer);font-size:10px;text-align:center">ยังไม่มีข้อมูลผู้ทำประตู</div>');
   }
 
   function renderDay(dayKey){
     const el = document.getElementById("day-" + dayKey);
-    const items = MATCHES.filter(m => m.day === dayKey && (m.isBreak || getMatchGrade(m) === activeAdminGrade));
-    el.innerHTML = items.map(matchCard).join("");
+    const items = MATCHES.filter(m => m.day === dayKey);
+    if(dayKey === "fri"){
+      const groups = ["ม.ต้น", "ม.ปลาย"];
+      el.innerHTML = groups.map(g => {
+        const rows = items.filter(m => getMatchGrade(m) === g).map(matchCard).join("");
+        return `<div class="group-label">${g}<span class="rule"></span></div>${rows}`;
+      }).join("");
+    } else {
+      el.innerHTML = items.map(matchCard).join("");
+    }
   }
 
   function render(){
@@ -329,7 +337,6 @@
     renderNextLine();
     renderAdminStats();
   }
-  window.dpscupAdminSetGrade = function(g){ activeAdminGrade = g === "ม.ปลาย" ? "ม.ปลาย" : "ม.ต้น"; render(); };
 
   function bindEvents(){
     document.querySelectorAll("[data-toggle]").forEach(btn=>{
@@ -744,12 +751,17 @@
   function setGrade(g){
     grade=g;
     gradeTabs?.querySelectorAll('[data-grade]').forEach(b=>b.classList.toggle('active',b.dataset.grade===g));
-    window.adminGrade = g==='senior' ? 'ม.ปลาย' : 'ม.ต้น';
-    window.dpscupAdminSetGrade?.(window.adminGrade);
-    sections.matches?.classList.remove('admin-section-hidden');
-    dayTabs?.classList.remove('admin-section-hidden');
-    document.getElementById('topAdmin')?.classList.remove('admin-section-hidden');
-    seniorEmpty?.setAttribute('hidden','');
+    if(g==='senior' && tab==='matches'){
+      sections.matches?.classList.add('admin-section-hidden');
+      dayTabs?.classList.add('admin-section-hidden');
+      document.getElementById('topAdmin')?.classList.add('admin-section-hidden');
+      seniorEmpty?.removeAttribute('hidden');
+    }else if(g==='minor' && tab==='matches'){
+      sections.matches?.classList.remove('admin-section-hidden');
+      dayTabs?.classList.remove('admin-section-hidden');
+      document.getElementById('topAdmin')?.classList.remove('admin-section-hidden');
+      seniorEmpty?.setAttribute('hidden','');
+    }
     if(g==='senior' && tab==='bracket'){
       // bracket section already contains the senior assignment tool
     }
@@ -759,16 +771,16 @@
     nav?.querySelectorAll('[data-admin-tab]').forEach(b=>b.classList.toggle('active',b.dataset.adminTab===t));
     Object.entries(sections).forEach(([key,el])=>{if(el)el.classList.toggle('admin-section-hidden',key!==t);});
     const top=document.getElementById('topAdmin');
-    if(top) top.classList.toggle('admin-section-hidden',t!=='matches');
-    dayTabs?.classList.toggle('admin-section-hidden',t!=='matches');
-    seniorEmpty?.setAttribute('hidden','');
+    if(top) top.classList.toggle('admin-section-hidden',t!=='matches' || grade!=='minor');
+    dayTabs?.classList.toggle('admin-section-hidden',t!=='matches' || grade!=='minor');
+    seniorEmpty?.toggleAttribute('hidden',!(t==='matches' && grade==='senior'));
     if(t!=='matches') window.scrollTo({top:0,behavior:'smooth'});
   }
   gradeTabs?.addEventListener('click',e=>{const b=e.target.closest('[data-grade]');if(!b)return;setGrade(b.dataset.grade);if(tab!=='matches')setTab('matches');});
   nav?.addEventListener('click',e=>{const b=e.target.closest('[data-admin-tab]');if(!b)return;setTab(b.dataset.adminTab);});
   document.addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(!b)return;setTab(b.dataset.jump);});
   window.dpscupAdminSetTab=setTab;
-  window.adminGrade='ม.ต้น'; setTab('matches');setGrade('minor');
+  setTab('matches');setGrade('minor');
 })();
 </script>
 </body>
