@@ -17,8 +17,8 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
 .match-main{display:grid;grid-template-columns:minmax(0,1fr) 92px minmax(0,1fr);align-items:center;gap:12px}
 .match-team{font-size:15px;line-height:1.45;font-weight:600;color:#173b6d}.team-b{text-align:right}.match-team.winner{font-weight:800;color:#062b67}.match-team.loser{color:#91a3ba;font-weight:500}
 .match-score{text-align:center}.m-score{font-family:'Chakra Petch';font-size:30px;font-weight:700;color:#062b67;white-space:nowrap}.m-score .dash{color:#9eb0c5;margin:0 7px}.m-score.tbd{font-family:'Prompt';font-size:11px;color:#91a3ba}
-.goal-log{margin:12px 0 0;padding:9px 0 0;border-top:1px solid #edf2f8;display:flex;flex-wrap:wrap;gap:7px 16px;font-size:11px;color:#617895}.goal-item{display:flex;align-items:center;gap:6px}.goal-dot{width:6px;height:6px;border-radius:50%;background:#1769e0}.goal-item.gb .goal-dot{background:#7c3aed}.goal-item small{color:#a0adbd;font-size:9px}
-@media(max-width:650px){.match-main{grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:8px}.match-team{font-size:13px}.m-score{font-size:26px}}
+.goal-log{margin:12px 0 0;padding:11px 0 0;border-top:1px solid #edf2f8;display:grid;grid-template-columns:1fr 1fr;gap:18px;font-size:11px;color:#617895}.goal-side{min-width:0}.goal-side-title{font-size:9px;font-weight:700;color:#8aa0bb;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.goal-item{display:flex;align-items:center;gap:7px;min-height:22px;color:#173c70;font-weight:600}.goal-item .goal-dot{width:6px;height:6px;border-radius:50%;background:#1769e0;flex:0 0 6px}.goal-side-b .goal-dot{background:#7c3aed}.goal-item small{color:#8b9db3;font-size:9px;font-weight:500}
+@media(max-width:650px){.match-main{grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:8px}.match-team{font-size:13px}.m-score{font-size:26px}.goal-log{grid-template-columns:1fr;gap:8px}.goal-side-title{font-size:9px}}
 </style>
 \n<body>\n<div class="wrap" id="top">
 <nav class="top-nav"><a class="nav-brand" href="#top"><img src="dpspn-logo.png" alt="DPSPN"><span>DPSCUP <small>2026</small></span></a><div class="nav-links"><a href="#matches">ผลการแข่งขัน</a><a href="#stats">ดาวซัลโว</a><a href="summary.html">สรุปผล</a><a href="bracket.html">ผังการแข่งขัน</a><a href="#issueOpen">รายงานปัญหา</a></div></nav>
@@ -220,18 +220,20 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     if(hasScore && goals.length){
       const valid=goals.filter(g=>g.scorer||g.og);
       if(valid.length){
-        goalLogHtml=`<div class="goal-log">${valid.map(g=>{
+        const sideHtml=(team, teamName)=>valid.filter(g=>g.team===team).map(g=>{
           const nm=normalizeScorerName(g.scorer||'');
-          return `<div class="goal-item ${g.team==='a'?'ga':'gb'}"><span class="goal-dot"></span><span>${escapeHtml(nm||'เข้าประตูตัวเอง')}${g.og?' <small>(OG)</small>':''}</span></div>`;
-        }).join('')}</div>`;
+          return `<div class="goal-item"><span class="goal-dot"></span><span>${escapeHtml(nm||'เข้าประตูตัวเอง')}${g.og?' <small>(OG)</small>':''}</span></div>`;
+        }).join('');
+        const aGoals=sideHtml('a',m.a), bGoals=sideHtml('b',m.b);
+        goalLogHtml=`<div class="goal-log"><div class="goal-side goal-side-a"><div class="goal-side-title">${escapeHtml(m.a)}</div>${aGoals || '<div class="goal-item" style="color:#9aabc0;font-weight:400">—</div>'}</div><div class="goal-side goal-side-b"><div class="goal-side-title">${escapeHtml(m.b)}</div>${bGoals || '<div class="goal-item" style="color:#9aabc0;font-weight:400">—</div>'}</div></div>`;
       }
     }
     return `<article class="match">
       <div class="match-meta"><span class="grade-badge ${getMatchGrade(m)==='ม.ปลาย'?'senior':'junior'}">${getMatchGrade(m)}</span><span>${m.time||''}</span></div>
       <div class="match-main">
-        <div class="match-team team-a ${aWin?'winner':bWin?'loser':''}">${escapeHtml(m.a)}</div>
+        <div class="match-team team-a">${escapeHtml(m.a)}</div>
         <div class="match-score">${scoreHtml}</div>
-        <div class="match-team team-b ${bWin?'winner':aWin?'loser':''}">${escapeHtml(m.b)}</div>
+        <div class="match-team team-b">${escapeHtml(m.b)}</div>
       </div>
       ${goalLogHtml}
     </article>`;
