@@ -667,26 +667,20 @@
     const btn = document.getElementById("printBtn");
     const originalLabel = btn.innerHTML;
     btn.classList.add("pdf-busy");
-    btn.innerHTML = "กำลังเตรียมพิมพ์...";
+    btn.innerHTML = "กำลังสร้างรายงาน...";
 
-    // เปิดหน้าต่างพิมพ์ใหม่ทันทีจากการแตะปุ่ม เพื่อไม่ให้ Safari/iPad บล็อก popup
-    const printWin = window.open("", "_blank");
-    if(!printWin){
-      btn.classList.remove("pdf-busy");
-      btn.innerHTML = originalLabel;
-      showToast("Safari บล็อกหน้าพิมพ์ · อนุญาต Pop-up แล้วลองใหม่");
-      return;
-    }
-
+    // สร้าง HTML รายงานจากข้อมูลปัจจุบันก่อน
     const reportHtml = buildPrintReport();
     const reportCss = `
-      @page{size:A4;margin:0}
+      @page{size:A4;margin:12mm}
       *{box-sizing:border-box}
       html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,'Prompt',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      .pr-day{width:210mm;min-height:297mm;padding:8mm 10mm;page-break-after:always;break-after:page;background:#fff}
+      body{padding:0}
+      .report-wrap{width:100%;max-width:190mm;margin:0 auto}
+      .pr-day{width:100%;min-height:270mm;padding:0 0 8mm;page-break-after:always;break-after:page;background:#fff}
       .pr-day:last-child{page-break-after:auto;break-after:auto}
       .pr-title{font-size:22px;font-weight:700;margin:0 0 4mm}
-      .pr-venue{font-size:11px;color:#777;margin:-3mm 0 5mm}
+      .pr-venue{font-size:11px;color:#777;margin:-2mm 0 5mm}
       .pr-group{font-weight:700;font-size:15px;margin:5mm 0 2mm;border-bottom:1px solid #ddd;padding-bottom:1mm}
       .pr-game{font-size:11px;color:#777;margin:4mm 0 .5mm;font-weight:600}
       .pr-teams{font-size:14px;font-weight:600;margin-bottom:1mm}
@@ -694,25 +688,29 @@
       .pr-final{font-weight:700;text-decoration:underline;color:#000}
       .pr-pending{font-size:12px;color:#999;font-style:italic}
       .pr-break{text-align:center;font-size:11px;color:#999;margin:4mm 0}
+      .print-actions{position:sticky;top:0;background:#fff;padding:10px 0 14px;margin-bottom:8px;border-bottom:1px solid #ddd;text-align:center}
+      .print-actions button{font-size:16px;padding:10px 18px;border-radius:8px;border:1px solid #bbb;background:#111;color:#fff}
+      @media print{.print-actions{display:none!important}.report-wrap{max-width:none}.pr-day{min-height:auto}}
     `;
 
-    printWin.document.open();
-    printWin.document.write(`<!doctype html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPSCUP Score Report</title><style>${reportCss}</style></head><body>${reportHtml}</body></html>`);
-    printWin.document.close();
+    // ใช้ Blob URL แทน about:blank + document.write ซึ่ง Safari/iPad บางรุ่นพิมพ์เป็นหน้าขาว
+    const fullHtml = `<!doctype html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPSCUP Score Report</title><style>${reportCss}</style></head><body><div class="print-actions"><button onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button></div><main class="report-wrap">${reportHtml}</main></body></html>`;
+    const blob = new Blob([fullHtml], {type:"text/html;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const printWin = window.open(url, "_blank");
 
-    const doPrint = ()=>{
-      try{
-        printWin.focus();
-        printWin.print();
-      }catch(err){
-        console.error("Print error:", err);
-      }
-      btn.classList.remove("pdf-busy");
-      btn.innerHTML = originalLabel;
-    };
+    btn.classList.remove("pdf-busy");
+    btn.innerHTML = originalLabel;
 
-    // รอให้ DOM ในแท็บใหม่วาดเสร็จก่อนเรียก Print
-    setTimeout(doPrint, 700);
+    if(!printWin){
+      URL.revokeObjectURL(url);
+      showToast("Safari บล็อกหน้ารายงาน · อนุญาต Pop-up แล้วลองใหม่");
+      return;
+    }
+
+    // ให้แท็บรายงานโหลดเต็มก่อน แล้วค่อยเรียก print จากปุ่มในรายงาน
+    // (หลีกเลี่ยง iPad Safari เปิด print preview ก่อน DOM พร้อม)
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
   });
 
   // ---------- Init ----------
