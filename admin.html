@@ -119,7 +119,7 @@
   .goal-add .team-lbl{ font-size:12px; color:var(--ink-dim); width:88px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .goal-add input[type="text"]{
     flex:1; background:var(--bg); border:1px solid var(--line-strong); border-radius:7px;
-    color:var(--ink); font-family:'Prompt',sans-serif; font-size:12.5px; padding:8px 9px;
+    color:var(--ink); font-family:'Prompt',sans-serif; font-size:16px; padding:8px 9px;
   }
   .goal-add input::placeholder{ color:var(--ink-dimmer); }
   .goal-add label.og{ font-size:10.5px; color:var(--ink-dimmer); display:flex; align-items:center; gap:3px; flex-shrink:0; white-space:nowrap; }
@@ -135,6 +135,11 @@
   .panel-foot .switch{ font-size:11.5px; color:var(--ink-dimmer); background:none; border:none; cursor:pointer; text-decoration:underline; }
   .panel-foot .close{ font-size:12.5px; color:var(--amber); background:none; border:none; cursor:pointer; font-weight:500; }
 
+  .editor-title{ font-weight:700; margin-bottom:8px; }
+  .scorer-section{ margin-top:12px; padding-top:11px; border-top:1px solid var(--line); }
+  .section-label{ font-size:12px; color:var(--ink); font-weight:600; margin-bottom:8px; }
+  .section-label span{ color:var(--ink-dimmer); font-weight:400; }
+  .empty-goals{ font-size:11.5px; color:var(--ink-dimmer); padding:5px 0; }
   .manual-row{ display:flex; align-items:center; gap:9px; }
   .manual-row input[type="number"]{
     width:48px; text-align:center; background:var(--bg); border:1px solid var(--line-strong); border-radius:7px;
@@ -157,8 +162,11 @@
 
   /* ---------- Print report (rendered off-screen, captured to PDF) ---------- */
   #printReport{
-    position:fixed; top:0; left:0; width:210mm; background:#fff; color:#111; z-index:-1; opacity:0.01;
+    display:none;
+    position:absolute; top:0; left:0; width:210mm; min-height:297mm;
+    background:#fff; color:#111; z-index:99999; opacity:1;
     font-family:'Prompt', Arial, sans-serif; pointer-events:none;
+    box-sizing:border-box;
   }
   .pr-day{ padding:8mm 10mm; page-break-after:always; }
   .pr-day:last-child{ page-break-after:auto; }
@@ -351,10 +359,18 @@
 
     // Pre-filled matches use their original result until an admin edits them.
     if(!rep && m.final) return {mode:"goals", ...scoreFromGoals(m.goals)};
-
     if(!rep) return null;
-    if(rep.mode==="manual") return {mode:"manual", a:rep.scoreA, b:rep.scoreB, steps:[]};
-    return {mode:"goals", ...scoreFromGoals(rep.goals || [])};
+
+    // New format keeps manual score AND scorer list together so saving a score
+    // can never erase scorer names.
+    if(rep.mode === "manual"){
+      const goals = Array.isArray(rep.goals) ? rep.goals : [];
+      return {mode:"manual", a:Number(rep.scoreA ?? 0), b:Number(rep.scoreB ?? 0), steps:scoreFromGoals(goals).steps, goals};
+    }
+
+    const goals = Array.isArray(rep.goals) ? rep.goals : [];
+    const scored = scoreFromGoals(goals);
+    return {mode:"goals", a:scored.a, b:scored.b, steps:scored.steps, goals};
   }
 
   function escapeHtml(s){
@@ -374,7 +390,7 @@
       : `<span class="m-score tbd">ยังไม่แข่ง</span>`;
 
     let goalLogHtml = "";
-    if(hasScore && res.mode==="goals" && res.steps.length){
+    if(hasScore && res.steps.length){
       goalLogHtml = `<div class="goal-log">` + res.steps.map((s,i)=>{
         const isLast = i===res.steps.length-1;
         return `<div class="${isLast?'g-final':''}">${s.a}-${s.b}${s.label ? " ⚽ "+escapeHtml(s.label) : " ⚽"}</div>`;
@@ -406,53 +422,48 @@
   }
 
   function panelHtml(m){
-    const rep = reported[m.id] || {mode:"manual", scoreA:0, scoreB:0};
-    const isManual = rep.mode !== "goals";
-    const goals = rep.goals || [];
-    const current = isManual
-      ? {a:Number(rep.scoreA ?? 0), b:Number(rep.scoreB ?? 0)}
-      : scoreFromGoals(goals);
+    const rep = reported[m.id] || {};
+    const existingGoals = Array.isArray(rep.goals) ? rep.goals : [];
+    const fromGoals = scoreFromGoals(existingGoals);
+    const scoreA = rep.mode === "manual" ? Number(rep.scoreA ?? fromGoals.a) : fromGoals.a;
+    const scoreB = rep.mode === "manual" ? Number(rep.scoreB ?? fromGoals.b) : fromGoals.b;
 
-    const rows = goals.map((g,i)=>{
-      const run = scoreFromGoals(goals.slice(0,i+1));
+    const rows = existingGoals.map((g,i)=>{
+      const run = scoreFromGoals(existingGoals.slice(0,i+1));
       const label = g.scorer ? g.scorer + (g.og ? " (OG)" : "") : (g.og ? "เข้าประตูตัวเอง" : "ไม่ระบุชื่อ");
       return `<div class="logged-row"><span class="sc">${run.a}-${run.b}</span><span>${escapeHtml(g.team==="a"?m.a:m.b)} · ${escapeHtml(label)}</span>
-        <button class="rm" data-rmgoal="${m.id}" data-idx="${i}">✕</button></div>`;
+        <button class="rm" data-rmgoal="${m.id}" data-idx="${i}" type="button">✕</button></div>`;
     }).join("");
 
     return `<div class="panel" id="panel-${m.id}">
-      <div class="manual-editor">
-        <div style="font-weight:700;margin-bottom:8px;">แก้สกอร์โดยตรง</div>
-        <div class="manual-row">
-          <input type="number" min="0" max="99" id="manA-${m.id}" value="${current.a}" aria-label="${escapeHtml(m.a)}">
-          <span style="color:var(--ink-dimmer)">–</span>
-          <input type="number" min="0" max="99" id="manB-${m.id}" value="${current.b}" aria-label="${escapeHtml(m.b)}">
-          <button class="save" data-savemanual="${m.id}">บันทึกสกอร์</button>
-        </div>
-        <div class="panel-foot" style="border-top:none;margin-top:8px;padding-top:0;">
-          <button class="switch" data-switchmode="${m.id}" data-to="goals">ใส่ผู้ทำประตูแทน</button>
-          <button class="close" data-closepanel="${m.id}">ปิด</button>
-        </div>
+      <div class="editor-title">บันทึกผลการแข่งขัน</div>
+      <div class="manual-row">
+        <input type="number" min="0" max="99" inputmode="numeric" id="manA-${m.id}" value="${scoreA}" aria-label="สกอร์ ${escapeHtml(m.a)}">
+        <span style="color:var(--ink-dimmer)">–</span>
+        <input type="number" min="0" max="99" inputmode="numeric" id="manB-${m.id}" value="${scoreB}" aria-label="สกอร์ ${escapeHtml(m.b)}">
+        <button class="save" data-savemanual="${m.id}" type="button">บันทึกสกอร์</button>
       </div>
 
-      <div class="goals-editor" style="display:none" id="goalsMode-${m.id}">
+      <div class="scorer-section">
+        <div class="section-label">ผู้ทำประตู <span>(ไม่บังคับ)</span></div>
         <div class="goal-add">
           <span class="team-lbl">${escapeHtml(m.a)}</span>
-          <input type="text" id="scorerA-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
+          <input type="text" id="scorerA-${m.id}" placeholder="ชื่อผู้ทำประตู" autocomplete="off" autocapitalize="words" enterkeyhint="done">
           <label class="og"><input type="checkbox" id="ogA-${m.id}"> OG</label>
-          <button class="add" data-addgoal="${m.id}" data-team="a">+ ประตู</button>
+          <button class="add" data-addgoal="${m.id}" data-team="a" type="button">+ ประตู</button>
         </div>
         <div class="goal-add">
           <span class="team-lbl">${escapeHtml(m.b)}</span>
-          <input type="text" id="scorerB-${m.id}" placeholder="ชื่อผู้ทำประตู (ไม่บังคับ)">
+          <input type="text" id="scorerB-${m.id}" placeholder="ชื่อผู้ทำประตู" autocomplete="off" autocapitalize="words" enterkeyhint="done">
           <label class="og"><input type="checkbox" id="ogB-${m.id}"> OG</label>
-          <button class="add" data-addgoal="${m.id}" data-team="b">+ ประตู</button>
+          <button class="add" data-addgoal="${m.id}" data-team="b" type="button">+ ประตู</button>
         </div>
-        <div class="logged">${rows}</div>
-        <div class="panel-foot">
-          <button class="switch" data-switchmode="${m.id}" data-to="manual">กลับไปแก้สกอร์</button>
-          <button class="close" data-closepanel="${m.id}">ปิด</button>
-        </div>
+        <div class="logged">${rows || '<div class="empty-goals">ยังไม่มีรายชื่อผู้ทำประตู</div>'}</div>
+      </div>
+
+      <div class="panel-foot">
+        <span style="font-size:11px;color:var(--ink-dimmer)">บันทึกสกอร์แล้ว รายชื่อผู้ทำประตูจะไม่หาย</span>
+        <button class="close" data-closepanel="${m.id}" type="button">ปิด</button>
       </div>
     </div>`;
   }
@@ -488,48 +499,75 @@
     document.querySelectorAll("[data-closepanel]").forEach(btn=>{
       btn.onclick = () => document.getElementById("panel-"+btn.dataset.closepanel).classList.remove("open");
     });
+
     document.querySelectorAll("[data-addgoal]").forEach(btn=>{
       btn.onclick = async () => {
         const id = btn.dataset.addgoal, team = btn.dataset.team;
-        const scorer = document.getElementById(`scorer${team.toUpperCase()}-${id}`).value.trim();
-        const og = document.getElementById(`og${team.toUpperCase()}-${id}`).checked;
-        if(!reported[id] || reported[id].mode!=="goals") reported[id] = {mode:"goals", goals:[]};
+        const input = document.getElementById(`scorer${team.toUpperCase()}-${id}`);
+        const check = document.getElementById(`og${team.toUpperCase()}-${id}`);
+        const scorer = input ? input.value.trim() : "";
+        const og = !!(check && check.checked);
+
+        if(!reported[id]){
+          // First scorer entry: use goal mode so the score is calculated from goals.
+          reported[id] = {mode:"goals", goals:[]};
+        }
+        if(!Array.isArray(reported[id].goals)) reported[id].goals = [];
         reported[id].goals.push({team, scorer, og});
-        await persist();
-        render();
-        document.getElementById("panel-"+id).classList.add("open");
+
+        const ok = await persist();
+        if(ok){
+          showToast("เพิ่มผู้ทำประตูแล้ว ✓");
+          if(input) input.value = "";
+          if(check) check.checked = false;
+          render();
+          document.getElementById("panel-"+id)?.classList.add("open");
+        }
       };
     });
+
     document.querySelectorAll("[data-rmgoal]").forEach(btn=>{
       btn.onclick = async () => {
         const id = btn.dataset.rmgoal, idx = parseInt(btn.dataset.idx,10);
+        if(!reported[id] || !Array.isArray(reported[id].goals)) return;
         reported[id].goals.splice(idx,1);
-        await persist();
-        render();
-        document.getElementById("panel-"+id).classList.add("open");
+        const ok = await persist();
+        if(ok){
+          render();
+          document.getElementById("panel-"+id)?.classList.add("open");
+        }
       };
     });
-    document.querySelectorAll("[data-switchmode]").forEach(btn=>{
-      btn.onclick = () => {
-        const id = btn.dataset.switchmode, to = btn.dataset.to;
-        const goals = document.getElementById("goalsMode-"+id);
-        const manual = document.querySelector("#panel-"+id+" .manual-editor");
-        if(goals) goals.style.display = to==="goals" ? "block" : "none";
-        if(manual) manual.style.display = to==="manual" ? "block" : "none";
-      };
-    });
+
     document.querySelectorAll("[data-savemanual]").forEach(btn=>{
       btn.onclick = async () => {
         const id = btn.dataset.savemanual;
-        const a = parseInt(document.getElementById("manA-"+id).value,10);
-        const b = parseInt(document.getElementById("manB-"+id).value,10);
+        const inputA = document.getElementById("manA-"+id);
+        const inputB = document.getElementById("manB-"+id);
+        const a = parseInt(inputA?.value,10);
+        const b = parseInt(inputB?.value,10);
         if(isNaN(a) || isNaN(b)){ showToast("กรอกสกอร์ทั้งสองฝั่งก่อน"); return; }
-        reported[id] = {mode:"manual", scoreA:a, scoreB:b};
+
+        // IMPORTANT: merge instead of replacing the whole report.
+        // This preserves every scorer name already recorded.
+        const old = reported[id] || {};
+        reported[id] = {
+          mode:"manual",
+          scoreA:a,
+          scoreB:b,
+          goals:Array.isArray(old.goals) ? old.goals : []
+        };
+
+        btn.disabled = true;
+        const oldText = btn.textContent;
+        btn.textContent = "กำลังบันทึก...";
         const ok = await persist();
+        btn.disabled = false;
+        btn.textContent = oldText;
         if(ok) {
-          showToast("บันทึกผลแล้ว ✓");
+          showToast("บันทึกสกอร์แล้ว ✓");
           render();
-          document.getElementById("panel-"+id).classList.add("open");
+          document.getElementById("panel-"+id)?.classList.add("open");
         }
       };
     });
@@ -615,6 +653,14 @@
     btn.innerHTML = "กำลังสร้างไฟล์...";
     buildPrintReport();
     const el = document.getElementById("printReport");
+    // html2canvas/iOS can produce a blank PDF when the capture target is hidden,
+    // transparent, or behind the page. Make the report a real visible layer only
+    // for the duration of the capture, then restore the normal UI.
+    el.style.display = "block";
+    el.style.visibility = "visible";
+    el.style.opacity = "1";
+    el.style.zIndex = "99999";
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     try{
       if(window.html2pdf){
         await window.html2pdf()
@@ -633,7 +679,13 @@
         window.print();
       }
     }catch(err){
+      console.error("PDF error:", err);
       showToast("สร้าง PDF ไม่สำเร็จ ลองใหม่อีกครั้ง");
+    } finally {
+      el.style.display = "none";
+      el.style.visibility = "hidden";
+      el.style.opacity = "0";
+      el.style.zIndex = "-1";
     }
     btn.classList.remove("pdf-busy");
     btn.innerHTML = originalLabel;
