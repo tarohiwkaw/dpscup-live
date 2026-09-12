@@ -640,16 +640,16 @@
         if(m.isBreak){ html += `<div class="pr-break">— ${m.label} · ${m.time} —</div>`; return; }
         if(dayKey==="fri" && m.group !== lastGroup){
           lastGroup = m.group;
-          html += `<div class="pr-group">${m.group}</div>`;
+          html += `<div class="pr-group">${escapeHtml(m.group)}</div>`;
         }
         gameNo++;
         const res = currentResult(m);
         html += `<div class="pr-game">เกมที่ ${gameNo}${m.time ? " · " + m.time : ""}</div>`;
         html += `<div class="pr-teams">${escapeHtml(m.a)} vs ${escapeHtml(m.b)}</div>`;
-        if(res && res.mode==="goals" && res.steps.length){
-          res.steps.forEach((s,i)=>{
+        if(res && res.steps && res.steps.length){
+          res.steps.forEach((st,i)=>{
             const isLast = i===res.steps.length-1;
-            html += `<div class="pr-goal ${isLast?'pr-final':''}">${s.a}-${s.b}${s.label ? " (" + escapeHtml(s.label) + ")" : ""}</div>`;
+            html += `<div class="pr-goal ${isLast?'pr-final':''}">${st.a}-${st.b}${st.label ? " (" + escapeHtml(st.label) + ")" : ""}</div>`;
           });
         } else if(res){
           html += `<div class="pr-goal pr-final">${res.a}-${res.b}</div>`;
@@ -660,49 +660,59 @@
       html += `</div>`;
     });
     document.getElementById("printReport").innerHTML = html;
+    return html;
   }
 
-  document.getElementById("printBtn").addEventListener("click", async ()=>{
+  document.getElementById("printBtn").addEventListener("click", ()=>{
     const btn = document.getElementById("printBtn");
     const originalLabel = btn.innerHTML;
     btn.classList.add("pdf-busy");
     btn.innerHTML = "กำลังเตรียมพิมพ์...";
-    buildPrintReport();
 
-    const el = document.getElementById("printReport");
-    el.style.display = "block";
-    el.style.visibility = "visible";
-    el.style.opacity = "1";
-    el.style.zIndex = "99999";
-
-    // ใช้ระบบ Print ของ Safari โดยตรง แทน html2pdf
-    // เพราะบน iPad/iPhone html2pdf อาจสร้าง PDF ว่างได้
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-    let restored = false;
-    const restore = () => {
-      if(restored) return;
-      restored = true;
-      el.style.display = "none";
-      el.style.visibility = "hidden";
-      el.style.opacity = "0";
-      el.style.zIndex = "-1";
+    // เปิดหน้าต่างพิมพ์ใหม่ทันทีจากการแตะปุ่ม เพื่อไม่ให้ Safari/iPad บล็อก popup
+    const printWin = window.open("", "_blank");
+    if(!printWin){
       btn.classList.remove("pdf-busy");
       btn.innerHTML = originalLabel;
-      window.removeEventListener("afterprint", restore);
+      showToast("Safari บล็อกหน้าพิมพ์ · อนุญาต Pop-up แล้วลองใหม่");
+      return;
+    }
+
+    const reportHtml = buildPrintReport();
+    const reportCss = `
+      @page{size:A4;margin:0}
+      *{box-sizing:border-box}
+      html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,'Prompt',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .pr-day{width:210mm;min-height:297mm;padding:8mm 10mm;page-break-after:always;break-after:page;background:#fff}
+      .pr-day:last-child{page-break-after:auto;break-after:auto}
+      .pr-title{font-size:22px;font-weight:700;margin:0 0 4mm}
+      .pr-venue{font-size:11px;color:#777;margin:-3mm 0 5mm}
+      .pr-group{font-weight:700;font-size:15px;margin:5mm 0 2mm;border-bottom:1px solid #ddd;padding-bottom:1mm}
+      .pr-game{font-size:11px;color:#777;margin:4mm 0 .5mm;font-weight:600}
+      .pr-teams{font-size:14px;font-weight:600;margin-bottom:1mm}
+      .pr-goal{font-size:12px;margin:.5mm 0;color:#444}
+      .pr-final{font-weight:700;text-decoration:underline;color:#000}
+      .pr-pending{font-size:12px;color:#999;font-style:italic}
+      .pr-break{text-align:center;font-size:11px;color:#999;margin:4mm 0}
+    `;
+
+    printWin.document.open();
+    printWin.document.write(`<!doctype html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPSCUP Score Report</title><style>${reportCss}</style></head><body>${reportHtml}</body></html>`);
+    printWin.document.close();
+
+    const doPrint = ()=>{
+      try{
+        printWin.focus();
+        printWin.print();
+      }catch(err){
+        console.error("Print error:", err);
+      }
+      btn.classList.remove("pdf-busy");
+      btn.innerHTML = originalLabel;
     };
 
-    window.addEventListener("afterprint", restore, {once:true});
-
-    try{
-      window.print();
-      // Safari บางเวอร์ชันไม่ยิง afterprint; คืน UI หลังจากเวลาพอให้ print sheet เปิด
-      setTimeout(restore, 3000);
-    }catch(err){
-      console.error("Print error:", err);
-      restore();
-      showToast("เปิดหน้าพิมพ์ไม่สำเร็จ ลองใหม่อีกครั้ง");
-    }
+    // รอให้ DOM ในแท็บใหม่วาดเสร็จก่อนเรียก Print
+    setTimeout(doPrint, 700);
   });
 
   // ---------- Init ----------
