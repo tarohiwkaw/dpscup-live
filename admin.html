@@ -6,7 +6,8 @@
 <title>DPSCUP ครั้งที่ 2 — ผู้ดูแลสกอร์</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -160,7 +161,7 @@
 
   footer{ text-align:center; color:var(--ink-dimmer); font-size:11px; margin-top:26px; padding:0 16px; line-height:1.7; }
 
-  /* ---------- Print report (rendered off-screen, captured to PDF) ---------- */
+  /* ---------- Print report source (used to generate PDF) ---------- */
   #printReport{
     display:none;
     position:absolute; top:0; left:0; width:210mm; min-height:297mm;
@@ -663,54 +664,77 @@
     return html;
   }
 
-  document.getElementById("printBtn").addEventListener("click", ()=>{
+  document.getElementById("printBtn").addEventListener("click", async ()=>{
     const btn = document.getElementById("printBtn");
     const originalLabel = btn.innerHTML;
-    btn.classList.add("pdf-busy");
-    btn.innerHTML = "กำลังสร้างรายงาน...";
-
-    // สร้าง HTML รายงานจากข้อมูลปัจจุบันก่อน
-    const reportHtml = buildPrintReport();
-    const reportCss = `
-      @page{size:A4;margin:12mm}
-      *{box-sizing:border-box}
-      html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,'Prompt',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      body{padding:0}
-      .report-wrap{width:100%;max-width:190mm;margin:0 auto}
-      .pr-day{width:100%;min-height:270mm;padding:0 0 8mm;page-break-after:always;break-after:page;background:#fff}
-      .pr-day:last-child{page-break-after:auto;break-after:auto}
-      .pr-title{font-size:22px;font-weight:700;margin:0 0 4mm}
-      .pr-venue{font-size:11px;color:#777;margin:-2mm 0 5mm}
-      .pr-group{font-weight:700;font-size:15px;margin:5mm 0 2mm;border-bottom:1px solid #ddd;padding-bottom:1mm}
-      .pr-game{font-size:11px;color:#777;margin:4mm 0 .5mm;font-weight:600}
-      .pr-teams{font-size:14px;font-weight:600;margin-bottom:1mm}
-      .pr-goal{font-size:12px;margin:.5mm 0;color:#444}
-      .pr-final{font-weight:700;text-decoration:underline;color:#000}
-      .pr-pending{font-size:12px;color:#999;font-style:italic}
-      .pr-break{text-align:center;font-size:11px;color:#999;margin:4mm 0}
-      .print-actions{position:sticky;top:0;background:#fff;padding:10px 0 14px;margin-bottom:8px;border-bottom:1px solid #ddd;text-align:center}
-      .print-actions button{font-size:16px;padding:10px 18px;border-radius:8px;border:1px solid #bbb;background:#111;color:#fff}
-      @media print{.print-actions{display:none!important}.report-wrap{max-width:none}.pr-day{min-height:auto}}
-    `;
-
-    // ใช้ Blob URL แทน about:blank + document.write ซึ่ง Safari/iPad บางรุ่นพิมพ์เป็นหน้าขาว
-    const fullHtml = `<!doctype html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPSCUP Score Report</title><style>${reportCss}</style></head><body><div class="print-actions"><button onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button></div><main class="report-wrap">${reportHtml}</main></body></html>`;
-    const blob = new Blob([fullHtml], {type:"text/html;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const printWin = window.open(url, "_blank");
-
-    btn.classList.remove("pdf-busy");
-    btn.innerHTML = originalLabel;
-
-    if(!printWin){
-      URL.revokeObjectURL(url);
-      showToast("Safari บล็อกหน้ารายงาน · อนุญาต Pop-up แล้วลองใหม่");
+    if(typeof html2canvas === "undefined" || !window.jspdf){
+      showToast("โหลดระบบสร้าง PDF ไม่สำเร็จ · ลองรีเฟรชหน้าเว็บ");
       return;
     }
 
-    // ให้แท็บรายงานโหลดเต็มก่อน แล้วค่อยเรียก print จากปุ่มในรายงาน
-    // (หลีกเลี่ยง iPad Safari เปิด print preview ก่อน DOM พร้อม)
-    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    btn.classList.add("pdf-busy");
+    btn.innerHTML = "กำลังสร้าง PDF…";
+
+    try{
+      // สร้างรายงานจากข้อมูล Firebase ปัจจุบัน
+      buildPrintReport();
+      const source = document.getElementById("printReport");
+      const pages = Array.from(source.querySelectorAll(".pr-day"));
+      if(!pages.length) throw new Error("ไม่มีข้อมูลรายงาน");
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({orientation:"portrait", unit:"mm", format:"a4", compress:true});
+
+      // จับภาพทีละหน้าเป็นภาพ เพื่อหลีกเลี่ยงปัญหา Print Preview ขาวบน iPad Safari
+      for(let i=0;i<pages.length;i++){
+        const temp = document.createElement("div");
+        temp.style.cssText = [
+          "position:fixed","left:-10000px","top:0","display:block",
+          "width:210mm","min-height:297mm","padding:0","margin:0",
+          "background:#fff","color:#111","overflow:hidden",
+          "font-family:Prompt,Arial,sans-serif","box-sizing:border-box"
+        ].join(";");
+        const clone = pages[i].cloneNode(true);
+        clone.style.cssText = "width:210mm;min-height:297mm;padding:10mm 12mm;background:#fff;color:#111;box-sizing:border-box;page-break-after:auto";
+        temp.appendChild(clone);
+        document.body.appendChild(temp);
+
+        // รอให้ฟอนต์ไทยพร้อมก่อนจับภาพ
+        if(document.fonts && document.fonts.ready) await document.fonts.ready;
+        const canvas = await html2canvas(temp, {
+          backgroundColor:"#ffffff",
+          scale: 1.5,
+          useCORS:true,
+          logging:false,
+          width: Math.round(210/25.4*96),
+          height: Math.round(297/25.4*96),
+          windowWidth: Math.round(210/25.4*96),
+          windowHeight: Math.round(297/25.4*96)
+        });
+        temp.remove();
+
+        if(i>0) pdf.addPage();
+        const img = canvas.toDataURL("image/jpeg", 0.92);
+        pdf.addImage(img, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+      }
+
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      const w = window.open(url, "_blank");
+      if(!w){
+        // ถ้า Safari บล็อกแท็บใหม่ ให้ลองเปิดในแท็บปัจจุบัน
+        location.href = url;
+      }else{
+        setTimeout(()=>URL.revokeObjectURL(url), 120000);
+      }
+      showToast("สร้าง PDF เรียบร้อย · ใช้ปุ่มแชร์ของ Safari เพื่อบันทึกไฟล์ได้เลย");
+    }catch(err){
+      console.error(err);
+      showToast("สร้าง PDF ไม่สำเร็จ · ลองรีเฟรชแล้วกดใหม่");
+    }finally{
+      btn.classList.remove("pdf-busy");
+      btn.innerHTML = originalLabel;
+    }
   });
 
   // ---------- Init ----------
