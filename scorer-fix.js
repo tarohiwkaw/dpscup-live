@@ -27,6 +27,15 @@
       if(old) old.goals+=Number(row.goals)||0;
       else merged.set(key,{...row,name,goals:Number(row.goals)||0});
     });
+
+    // DPSCUP data correction: คอยรุนอานามยิง 6 ประตูจริง
+    // บางข้อมูลการแข่งขันเก็บรายชื่อไว้เพียง 5 ลูก จึงเติมลูกที่หายไป
+    // เฉพาะกรณีที่ยอดที่คำนวณได้ยังเป็น 5 เพื่อไม่ให้เกิดการบวกซ้ำภายหลัง
+    for(const row of merged.values()){
+      if(normalizeScorerName(row.name)==='คอยรุนอานาม' && Number(row.goals)===5){
+        row.goals=6;
+      }
+    }
     return [...merged.values()].sort((a,b)=>b.goals-a.goals||a.name.localeCompare(b.name,'th'));
   };
   console.info('[DPSCUP] scorer normalization fix loaded');

@@ -22,3 +22,10 @@
 
 ## v52
 แก้การรวมชื่อดาวซัลโว: รองรับรูปสะกดที่ต่างกัน เช่น คายรุนอานาม → คอยรุนอานาม และรวมยอดให้เป็นชื่อเดียวกันทุกหน้าที่แสดงดาวซัลโว
+
+
+## v53
+แก้ยอดดาวซัลโวคอยรุนอานามให้เป็น 6 เมื่อข้อมูลต้นทางคำนวณได้ 5 เพื่อรองรับข้อมูลที่บันทึกชื่อผู้ทำประตูหายไป 1 ลูก
+
+
+v54: fixed mobile match-card layout so long team names/scorers cannot overlap the center score; scorers flow 1-3 vertically then 4-6 in the next column.
