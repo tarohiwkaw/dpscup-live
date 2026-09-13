@@ -11,9 +11,15 @@
     "dpscup-2-reports": {
       ".read": "auth != null",
       ".write": "auth != null || !data.exists()",
-      ".indexOn": ["createdAt"]
+      ".indexOn": [
+        "createdAt"
+      ]
     },
     "dpscup-bracket": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "dpscup-2-schedule": {
       ".read": true,
       ".write": "auth != null"
     }

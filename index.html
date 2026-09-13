@@ -183,7 +183,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
 
   // ---------- Data ----------
   // Friday results are fixed goal logs (order = chronological, score computed cumulatively)
-  const MATCHES = [
+  let MATCHES = [
     {id:"fri-1", day:"fri", group:"ม.ต้น", time:"16:30", a:"DARK RAVENS X VORTEX", b:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", final:true,
       goals:[{team:"b", scorer:"กิรติ", og:true}]},
     {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO", b:"เสืออ้วน X YIYA KATONG", final:true,
@@ -222,7 +222,7 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
   // แยกรุ่นจากโครงสร้างการแข่งขันจริง: ม.ปลายมี 4 ทีม พบกันหมด 6 คู่
   const SENIOR_MATCH_IDS = new Set(['fri-4','sat-0b','sat-3','sat-6','sat-9','sat-12']);
   const SPECIAL_MATCH_IDS = new Set(['sun-onepiraya']);
-  function getMatchGrade(m){ if(SPECIAL_MATCH_IDS.has(m.id)) return 'พิเศษ'; return SENIOR_MATCH_IDS.has(m.id) ? 'ม.ปลาย' : 'ม.ต้น'; }
+  function getMatchGrade(m){ if(m && m.grade) return m.grade; if(SPECIAL_MATCH_IDS.has(m.id)) return 'พิเศษ'; return SENIOR_MATCH_IDS.has(m.id) ? 'ม.ปลาย' : 'ม.ต้น'; }
 
   const STORAGE_KEY = "dpscup-2-scores";
   const REPORTS_KEY = "dpscup-2-reports";
@@ -235,7 +235,19 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
 
   async function loadScores(){
     try{
-      if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){
+      const SCHEDULE_KEY = 'dpscup-2-schedule';
+  function applyScheduleObject(v){
+    if(!v || !Object.keys(v).length) return false;
+    const arr=Object.values(v).filter(x=>x && x.id);
+    if(!arr.length) return false;
+    MATCHES=arr.sort((a,b)=>{const d={fri:1,sat:2,sun:3}[a.day]||9,db={fri:1,sat:2,sun:3}[b.day]||9;return d-db || String(a.time||'').localeCompare(String(b.time||''));});
+    return true;
+  }
+  function watchSchedule(){
+    try{ if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){ if(!firebase.apps.length)firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG); firebase.database().ref(SCHEDULE_KEY).on('value',snap=>{ if(applyScheduleObject(snap.val())){ render(); } }); } }catch(e){console.error(e);} 
+  }
+  watchSchedule();
+  if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){
         firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);
         dbRef = firebase.database().ref(STORAGE_KEY);
         dbRef.on("value", snap => {
