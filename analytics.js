@@ -1,30 +1,21 @@
-/* DPSCUP visitor counter v51 — robust REST event counter */
 (function(){
   'use strict';
-  const KEY='dpscup-2-analytics';
-  function pageName(){
-    return (location.pathname.split('/').pop()||'index.html').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,80)||'index.html';
-  }
-  function dayKey(ts){
-    const d=new Date(ts);
-    const p=n=>String(n).padStart(2,'0');
-    return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
-  }
-  async function track(){
+  const ROOT='dpscup-2-analytics/views';
+  function dayKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function run(){
+    if(!window.firebase || !window.DPSCUP_FIREBASE_CONFIG) return setTimeout(run,400);
     try{
-      const cfg=window.DPSCUP_FIREBASE_CONFIG;
-      if(!cfg || !cfg.databaseURL) throw new Error('ไม่พบ Firebase databaseURL');
-      const base=String(cfg.databaseURL).replace(/\/$/,'');
+      if(!firebase.apps.length) firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);
+      const db=firebase.database();
       const now=Date.now();
-      const payload={page:pageName(),at:now,day:dayKey(now)};
-      const res=await fetch(base+'/'+KEY+'/views.json',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true});
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      console.log('[DPSCUP analytics] counted',payload);
-      window.DPSCUP_ANALYTICS={ok:true,payload};
-    }catch(e){
-      console.error('[DPSCUP analytics] count failed:',e);
-      window.DPSCUP_ANALYTICS={ok:false,error:String(e)};
-    }
+      const page=(location.pathname.split('/').pop()||'index.html').slice(0,80);
+      db.ref(ROOT).push({
+        page:page,
+        at:now,
+        day:dayKey(new Date(now)),
+        ua:(navigator.userAgent||'').slice(0,180)
+      }).catch(e=>console.warn('analytics write blocked',e));
+    }catch(e){console.warn('analytics init',e);setTimeout(run,1200);}
   }
-  track();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();

@@ -1,0 +1,51 @@
+{
+  "rules": {
+    "dpscup-admins": {
+      ".read": false,
+      "$uid": {
+        ".write": false,
+        ".validate": "newData.isBoolean() && newData.val() === true"
+      }
+    },
+    "dpscup-2-scores": {
+      ".read": true,
+      ".write": "auth != null && root.child('dpscup-admins').child(auth.uid).val() === true",
+      "$matchId": {
+        ".validate": "newData.hasChildren(['mode']) && (newData.child('mode').val() === 'manual' || newData.child('mode').val() === 'goals') && (!newData.child('scoreA').exists() || (newData.child('scoreA').isNumber() && newData.child('scoreA').val() >= 0 && newData.child('scoreA').val() <= 99)) && (!newData.child('scoreB').exists() || (newData.child('scoreB').isNumber() && newData.child('scoreB').val() >= 0 && newData.child('scoreB').val() <= 99))"
+      }
+    },
+    "dpscup-2-summary": {
+      ".read": true,
+      ".write": "auth != null && root.child('dpscup-admins').child(auth.uid).val() === true",
+      ".validate": "newData.hasChildren()"
+    },
+    "dpscup-2-schedule": {
+      ".read": true,
+      ".write": "auth != null && root.child('dpscup-admins').child(auth.uid).val() === true",
+      "$matchId": {
+        ".validate": "newData.hasChildren(['day','time']) && newData.child('day').isString() && newData.child('day').val().length <= 12 && newData.child('time').isString() && newData.child('time').val().length <= 10"
+      }
+    },
+    "dpscup-2-weather-announcement": {
+      ".read": true,
+      ".write": "auth != null && root.child('dpscup-admins').child(auth.uid).val() === true",
+      ".validate": "newData.hasChildren(['mode']) && (newData.child('mode').val() === 'off' || newData.child('mode').val() === 'waiting' || newData.child('mode').val() === 'postponed') && (!newData.child('date').exists() || newData.child('date').isString()) && (!newData.child('time').exists() || newData.child('time').isString())"
+    },
+    "dpscup-2-reports": {
+      ".read": "auth != null && root.child('dpscup-admins').child(auth.uid).val() === true",
+      "$reportId": {
+        ".write": "(!data.exists() && newData.exists()) || (auth != null && root.child('dpscup-admins').child(auth.uid).val() === true)",
+        ".validate": "newData.hasChildren(['detail','status','createdAt']) && newData.child('detail').isString() && newData.child('detail').val().length > 0 && newData.child('detail').val().length <= 1000 && newData.child('status').isString() && (newData.child('status').val() === 'new' || newData.child('status').val() === 'done') && newData.child('createdAt').isNumber() && newData.child('createdAt').val() <= now + 60000"
+      }
+    },
+    "dpscup-2-analytics": {
+      ".read": "auth != null && root.child('dpscup-admins').child(auth.uid).val() === true",
+      "views": {
+        "$viewId": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['page','at','day']) && newData.child('page').isString() && newData.child('page').val().length <= 80 && newData.child('at').isNumber() && newData.child('at').val() <= now + 60000 && newData.child('day').isString() && newData.child('day').val().length <= 10"
+        }
+      }
+    }
+  }
+}
