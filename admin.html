@@ -688,6 +688,7 @@
 
 
   // ---------- Schedule manager ----------
+  const BASE_MATCHES = JSON.parse(JSON.stringify(MATCHES));
   const SCHEDULE_KEY = "dpscup-2-schedule";
   let scheduleRef = null;
   let scheduleData = {};
@@ -731,9 +732,11 @@
   }
   async function seedSchedule(){
     if(!scheduleRef){showToast('Firebase ยังไม่พร้อม');return;}
-    if(Object.keys(scheduleData).length && !confirm('มีโปรแกรมที่บันทึกไว้แล้ว ต้องการแทนที่ด้วยโปรแกรมเดิมจากเว็บหรือไม่?'))return;
-    const seed={}; MATCHES.forEach(m=>{seed[m.id]={...m};});
-    try{await scheduleRef.set(seed);showToast('นำโปรแกรมเดิมเข้าฐานข้อมูลแล้ว ✓');}catch(e){console.error(e);showToast('บันทึกโปรแกรมเดิมไม่สำเร็จ');}
+    const current={...(scheduleData||{})};
+    const seed={}; BASE_MATCHES.forEach(m=>{seed[m.id]={...m};});
+    const merged={...seed,...current};
+    if(Object.keys(current).length && !confirm('จะกู้คืนรายการโปรแกรมเดิมที่หายไป โดยเก็บรายการที่เพิ่มเองไว้ด้วย ต้องการทำต่อหรือไม่?'))return;
+    try{await scheduleRef.set(merged);showToast('กู้คืน/ซิงก์โปรแกรมแล้ว ✓');}catch(e){console.error(e);showToast('ซิงก์โปรแกรมไม่สำเร็จ');}
   }
   function initScheduleManager(){
     try{
@@ -742,10 +745,14 @@
         document.getElementById('scheduleCloudStatus').textContent=Object.keys(scheduleData).length?`ออนไลน์ · ${Object.keys(scheduleData).length} รายการ`:'ยังไม่ได้สร้างโปรแกรม';
         // ใช้โปรแกรมจาก Firebase เป็นแหล่งข้อมูลเดียวกับหน้าคนดู เพื่อไม่ให้ Admin/คนดูคนละโปรแกรม
         if(Object.keys(scheduleData).length){
-          const baseById={};
-          // MATCHES ก่อนหน้านี้อาจมีข้อมูล goals เดิม จึงเก็บไว้แล้วให้ค่าจาก Firebase override เฉพาะข้อมูลโปรแกรม
-          (Array.isArray(MATCHES)?MATCHES:[]).forEach(m=>{baseById[m.id]=m;});
-          MATCHES=Object.values(scheduleData).filter(m=>m && m.id).map(m=>({...baseById[m.id],...m}));
+          const current=Object.values(scheduleData).filter(m=>m && m.id);
+          const baseById={}; BASE_MATCHES.forEach(m=>{baseById[m.id]=m;});
+          if(current.length < 20){
+            current.forEach(m=>{baseById[m.id]={...(baseById[m.id]||{}),...m};});
+            MATCHES=Object.values(baseById);
+          }else{
+            MATCHES=current.map(m=>({...baseById[m.id],...m}));
+          }
           MATCHES.sort((a,b)=>{const da={fri:1,sat:2,sun:3}[a.day]||9,db={fri:1,sat:2,sun:3}[b.day]||9;return da-db || String(a.time||'').localeCompare(String(b.time||''));});
         }
         renderScheduleManager();
