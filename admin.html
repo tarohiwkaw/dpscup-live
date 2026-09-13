@@ -18,7 +18,7 @@
 /* v24 admin UX */
 .admin-modebar{margin:16px 0 10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:var(--shadow)}
 .admin-mode-title span{display:block;font-weight:800;color:var(--navy);font-size:15px}.admin-mode-title small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
-.admin-grade-tabs{display:flex;gap:6px;background:#eef5ff;border-radius:11px;padding:4px}.admin-grade-tabs button{border:0;background:transparent;color:#6980a0;border-radius:8px;padding:8px 13px;font:700 12px Prompt}.admin-grade-tabs button.active{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(23,105,224,.18)}
+.admin-grade-tabs{display:flex;gap:6px;background:#eef5ff;border-radius:11px;padding:4px}.admin-grade-tabs button{border:0;background:transparent;color:#6980a0;border-radius:8px;padding:8px 13px;font:700 12px Prompt}.admin-grade-tabs button.active{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(23,105,224,.18)}.admin-grade-tabs button[data-grade="special"].active{background:#e9a500}.toolbar button.special-quick{background:#fff7e5;border-color:#f0d28a;color:#9a6900}
 .admin-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 14px;position:sticky;top:0;z-index:25;padding:6px 0;background:rgba(247,250,255,.94);backdrop-filter:blur(10px)}
 .admin-nav button{border:1px solid var(--line);background:#fff;color:#617a9c;border-radius:11px;padding:10px 8px;font:700 11px Prompt;box-shadow:0 4px 12px rgba(16,54,100,.03)}.admin-nav button.active{background:var(--navy);border-color:var(--navy);color:#fff}.admin-nav button b{display:inline-flex;min-width:18px;height:18px;align-items:center;justify-content:center;margin-left:3px;border-radius:99px;background:#ffe6e9;color:#c92f3d;font-size:9px}.admin-nav button.active b{background:#fff;color:#c92f3d}
 .admin-panel-section{scroll-margin-top:70px}.admin-match-section{scroll-margin-top:70px}
@@ -28,12 +28,12 @@
 
 .grade-badge{display:inline-block;margin-bottom:4px;padding:2px 7px;border-radius:999px;font:700 9px/1.2 Prompt,sans-serif;letter-spacing:.1px;border:1px solid #cfe0f5;background:#eef6ff;color:#1769e0;white-space:nowrap}.grade-badge.senior{background:#f3edff;border-color:#dfccff;color:#7b3fe4}.grade-badge.junior{background:#eef6ff;border-color:#cfe0f5;color:#1769e0}.grade-badge.special{background:#fdf1e0;border-color:#f2ddb0;color:#b3760a}.m-time{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px}
 </style>
-<body><div id="adminGate"><div id="adminBox"><h2>🔐 เข้าสู่ระบบผู้ดูแล</h2><div style="color:#7185a3;font-size:12px;line-height:1.6;margin-top:6px">เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น</div><input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username"><input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"><button id="adminEnter">เข้าสู่ระบบ</button><div id="adminErr"></div></div></div><div class="wrap"><header class="hero"><div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div><h1 class="title">DPSCUP <span class="no">ADMIN</span></h1><div class="eyebrow">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">🔐 แอดมินเท่านั้น</div><div class="toolbar"><button class="primary" id="printBtn">🖨️ พิมพ์ / บันทึก PDF</button><button id="logoutBtn">ออกจากระบบ</button></div><div class="next-line" id="nextLine"><span class="dot"></span><span id="nextText">กำลังโหลด…</span></div></header>
+<body><div id="adminGate"><div id="adminBox"><h2>🔐 เข้าสู่ระบบผู้ดูแล</h2><div style="color:#7185a3;font-size:12px;line-height:1.6;margin-top:6px">เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น</div><input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username"><input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"><button id="adminEnter">เข้าสู่ระบบ</button><div id="adminErr"></div></div></div><div class="wrap"><header class="hero"><div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div><h1 class="title">DPSCUP <span class="no">ADMIN</span></h1><div class="eyebrow">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">🔐 แอดมินเท่านั้น</div><div class="toolbar"><button class="primary" id="printBtn">🖨️ พิมพ์ / บันทึก PDF</button><button id="quickAddSchedule" type="button">📅 เพิ่มรายการแข่งขัน</button><button id="quickAddSpecial" type="button">🟡 เพิ่มรายการพิเศษ</button><button id="logoutBtn">ออกจากระบบ</button></div><div class="next-line" id="nextLine"><span class="dot"></span><span id="nextText">กำลังโหลด…</span></div></header>
 <div class="admin-modebar">
-  <div class="admin-mode-title"><span>จัดการการแข่งขัน</span><small>เลือกสิ่งที่ต้องการแก้ ไม่ต้องเลื่อนหาทั้งหน้า</small></div>
+  <div class="admin-mode-title"><span>จัดการการแข่งขัน</span><small>เลือกสิ่งที่ต้องการแก้ หรือกด “เพิ่มรายการแข่งขัน” ด้านบนเพื่อเพิ่มนัดใหม่</small></div>
   <div class="admin-grade-tabs" id="adminGradeTabs">
     <button class="active" data-grade="minor" type="button">🔵 ม.ต้น</button>
-    <button data-grade="senior" type="button">🟣 ม.ปลาย</button>
+    <button data-grade="senior" type="button">🟣 ม.ปลาย</button><button data-grade="special" type="button">🟡 พิเศษ</button>
   </div>
 </div>
 <nav class="admin-nav" id="adminNav">
@@ -46,7 +46,7 @@
 <nav class="days" id="dayTabs"><button data-day="fri"><span class="d">ศุกร์ 11 ก.ย.</span><span class="sub">ผลการแข่งขัน</span></button><button data-day="sat"><span class="d">เสาร์ 12 ก.ย.</span><span class="sub">รอบเช้า–บ่าย</span></button><button data-day="sun"><span class="d">อาทิตย์ 13 ก.ย.</span><span class="sub">รอบเช้า</span></button><a href="bracket.html">ผังการแข่งขัน</a></nav>
 <section class="schedule-admin admin-panel-section" data-admin-section="schedule">
   <div class="schedule-admin-head"><div><h2>📅 จัดการโปรแกรมแข่งขัน</h2><small>เพิ่ม / แก้ไข / ลบโปรแกรมได้จากหน้านี้ ไม่ต้องแก้โค้ด</small></div><span id="scheduleCloudStatus" style="font-size:10px;color:var(--muted)">กำลังโหลด…</span></div>
-  <div class="schedule-toolbar"><button class="primary" id="scheduleAddBtn" type="button">＋ เพิ่มนัดแข่งขัน</button><button id="scheduleSeedBtn" type="button">↺ ใช้โปรแกรมเดิมเป็นฐาน</button></div>
+  <div class="schedule-toolbar"><button class="primary" id="scheduleAddBtn" type="button">＋ เพิ่มรายการแข่งขัน</button><button id="scheduleSpecialBtn" type="button">🟡 เพิ่มรายการพิเศษ</button><button id="scheduleBreakBtn" type="button">☕ เพิ่มช่วงพัก</button><button id="scheduleSeedBtn" type="button">↺ ใช้โปรแกรมเดิมเป็นฐาน</button></div>
   <div class="schedule-list" id="scheduleList"><div style="padding:14px;color:var(--muted);font-size:11px">กำลังโหลดโปรแกรม…</div></div>
   <div class="schedule-form" id="scheduleForm" style="display:none">
     <input type="hidden" id="schId">
@@ -754,6 +754,8 @@
     }catch(e){console.error(e);}
   }
   document.getElementById('scheduleAddBtn')?.addEventListener('click',()=>openScheduleForm(null));
+  document.getElementById('scheduleSpecialBtn')?.addEventListener('click',()=>{openScheduleForm(null);document.getElementById('schGrade').value='พิเศษ';document.getElementById('schTime').value='16:00';});
+  document.getElementById('scheduleBreakBtn')?.addEventListener('click',()=>{openScheduleForm(null);document.getElementById('schType').value='break';});
   document.getElementById('scheduleCancelBtn')?.addEventListener('click',closeScheduleForm);
   document.getElementById('scheduleSaveBtn')?.addEventListener('click',saveScheduleItem);
   document.getElementById('scheduleSeedBtn')?.addEventListener('click',seedSchedule);
@@ -828,7 +830,7 @@
   function setGrade(g){
     grade=g;
     gradeTabs?.querySelectorAll('[data-grade]').forEach(b=>b.classList.toggle('active',b.dataset.grade===g));
-    window.adminGrade = g==='senior' ? 'ม.ปลาย' : 'ม.ต้น';
+    window.adminGrade = g==='senior' ? 'ม.ปลาย' : (g==='special' ? 'พิเศษ' : 'ม.ต้น');
     window.dpscupAdminSetGrade?.(window.adminGrade);
     sections.matches?.classList.remove('admin-section-hidden');
     dayTabs?.classList.remove('admin-section-hidden');
@@ -847,6 +849,8 @@
   nav?.addEventListener('click',e=>{const b=e.target.closest('[data-admin-tab]');if(!b)return;setTab(b.dataset.adminTab);});
   document.addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(!b)return;setTab(b.dataset.jump);});
   window.dpscupAdminSetTab=setTab;
+  document.getElementById('quickAddSchedule')?.addEventListener('click',()=>{setTab('schedule'); setTimeout(()=>document.getElementById('scheduleAddBtn')?.click(),50);});
+  document.getElementById('quickAddSpecial')?.addEventListener('click',()=>{setTab('schedule'); setTimeout(()=>{document.getElementById('scheduleAddBtn')?.click(); const g=document.getElementById('schGrade'); if(g) g.value='พิเศษ'; const t=document.getElementById('schTime'); if(t && !t.value) t.value='16:00';},50);});
   window.adminGrade='ม.ต้น'; setTab('matches');setGrade('minor');
 })();
 </script>
