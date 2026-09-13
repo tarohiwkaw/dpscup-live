@@ -15,7 +15,7 @@
       el.innerHTML=RAIN_HTML+(postponed?'<div class="flash"></div>':'')+'<div class="weather-top"><span>🌧️</span><span class="weather-status">DPSCUP WEATHER UPDATE</span><span>💧</span></div><div class="weather-main">'+title+'</div><div class="weather-sub">'+sub+'</div>'+(postponed?'<div class="weather-date">📅 ย้ายไปแข่งพรุ่งนี้ · '+esc(date)+(v.time?' · '+esc(v.time):'')+'</div>':'<div class="weather-date">⏳ รอติดตามสถานการณ์คืนนี้</div>');
     });
   }
-  function start(){if(!window.firebase||!window.DPSCUP_FIREBASE_CONFIG)return;try{if(!firebase.apps.length)firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);firebase.database().ref(KEY).on('value',s=>render(s.val()||{}));}catch(e){console.warn('weather announcement',e)}}
+  function start(){if(!window.firebase||!window.DPSCUP_FIREBASE_CONFIG){setTimeout(start,250);return;}try{if(!firebase.apps.length)firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);firebase.database().ref(KEY).on('value',s=>render(s.val()||{}));}catch(e){console.warn('weather announcement',e);setTimeout(start,500)}}
   window.DPSCUP_WEATHER={KEY,render,start};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
