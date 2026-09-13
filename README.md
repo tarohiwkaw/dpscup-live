@@ -1,6 +1,3 @@
-# DPSCUP v60
+DPSCUP v61 — premium weather announcement UI
 
-- ใช้วิดีโอฝนที่ผู้ใช้ส่งมาเป็นพื้นหลังเอฟเฟ็กต์จริงในกล่องประกาศฝนของทั้งรอบรองชนะเลิศและรอบชิงชนะเลิศ
-- วิดีโอเล่นแบบ loop / autoplay / muted / playsinline เพื่อรองรับ iPad/iPhone
-- เสียงฝนยังเปิดด้วยปุ่มจาก rain-sound.mp3 เพราะวิดีโอที่ส่งมาไม่มี audio track
-- โหมดประกาศยังควบคุมจาก Admin/Firebase เหมือนเดิม
+Uses the supplied rain-video.mp4 as the rain layer on semifinal, third-place, and final cards. Adds a compact entry popup with close button and optional rain sound. Admin weather controls are simplified.
