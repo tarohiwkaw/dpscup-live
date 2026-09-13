@@ -1,15 +1,13 @@
-# DPSCUP v30 — ระบบโปรแกรมแข่งใหม่
+# DPSCUP CLEAN REBUILD
 
-## จุดสำคัญ
-- โปรแกรมแข่งอยู่ที่ Firebase `dpscup-2-schedule`
-- Admin เพิ่ม/แก้/ลบรายการแข่งขันและรายการพิเศษได้
-- ลบรายการด้วย tombstone เพื่อไม่ให้โปรแกรมมาตรฐานเด้งกลับ
-- ปุ่ม “กู้รายการที่หาย” เติมเฉพาะรายการมาตรฐานที่หาย ไม่ลบรายการที่เพิ่มเอง
-- ปุ่ม “รีเซ็ตโปรแกรมมาตรฐาน” ใช้เมื่ออยากกลับไปชุดตั้งต้น
-- หน้าคนดูและ Admin ใช้โปรแกรมชุดเดียวกัน
-- ถ้า schedule ว่าง/อ่านไม่ได้ หน้าคนดูจะใช้โปรแกรมมาตรฐานแทน ไม่ใช่หน้าว่าง
-- คะแนนยังอยู่ที่ `dpscup-2-scores` และไม่ถูกลบจากการจัดการโปรแกรม
+อัปโหลด `index.html`, `admin.html`, `summary.html`, `bracket.html`, `style.css`, `app.js`, `dpspn-logo.png` และ `firebase-rules.json` แทนชุดเว็บเดิม
 
-## อัปโหลด
-แทนที่ `index.html`, `admin.html`, `summary.html`, `bracket.html`, `dpspn-logo.png` และใช้ `firebase-rules.json` ใน Firebase Rules
-**เก็บ `firebase-config.js` เดิมไว้**
+**อย่าลบ `firebase-config.js` เดิม** ให้เก็บไว้ใน repo เดิม
+
+ข้อมูลกลาง:
+- dpscup-2-schedule = โปรแกรม
+- dpscup-2-scores = คะแนน + ผู้ทำประตู
+- dpscup-2-summary = สรุปผล
+- dpscup-2-reports = รายงาน
+
+Admin และคนดูอ่านข้อมูลจากชุดเดียวกัน โปรแกรมที่เพิ่มใน Admin จะขึ้นคนดูอัตโนมัติ

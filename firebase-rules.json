@@ -4,18 +4,11 @@
       ".read": true,
       ".write": "auth != null"
     },
-    "dpscup-2-summary": {
-      ".read": true,
-      ".write": "auth != null"
-    },
     "dpscup-2-reports": {
       ".read": "auth != null",
-      ".write": true,
-      ".indexOn": [
-        "createdAt"
-      ]
+      ".write": true
     },
-    "dpscup-bracket": {
+    "dpscup-2-summary": {
       ".read": true,
       ".write": "auth != null"
     },
