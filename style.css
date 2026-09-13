@@ -5,3 +5,7 @@
 
 /* iPad / Safari login input hardening */
 .login-fields{display:block}.login-fields input{display:block;position:relative;z-index:2;pointer-events:auto;touch-action:manipulation;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;-webkit-appearance:none;appearance:none}.login-fields #pass{isolation:isolate}.login-fields #loginBtn{position:relative;z-index:2;pointer-events:auto}.login-box input:focus{outline:3px solid rgba(71,160,255,.55);outline-offset:0;border-color:#8bc5ff}.login-box input::placeholder{opacity:.72}
+
+/* iPad Safari: use text input with native-like visual masking to avoid password-field input bugs */
+#pass{-webkit-text-security:disc;text-security:disc;}
+#pass::placeholder{-webkit-text-security:none;text-security:none;}
