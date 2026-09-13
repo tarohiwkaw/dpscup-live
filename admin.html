@@ -69,7 +69,7 @@
 
   // ---------- Data ----------
   // Friday results are fixed goal logs (order = chronological, score computed cumulatively)
-  const MATCHES = [
+  let MATCHES = [
     {id:"fri-1", day:"fri", group:"ม.ต้น", time:"16:30", a:"DARK RAVENS X VORTEX", b:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", final:true,
       goals:[{team:"b", scorer:"กิรติ", og:true}]},
     {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO", b:"เสืออ้วน X YIYA KATONG", final:true,
@@ -737,7 +737,20 @@
   }
   function initScheduleManager(){
     try{
-      if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){if(!firebase.apps.length)firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);scheduleRef=firebase.database().ref(SCHEDULE_KEY);scheduleRef.on('value',snap=>{scheduleData=snap.val()||{};document.getElementById('scheduleCloudStatus').textContent=Object.keys(scheduleData).length?`ออนไลน์ · ${Object.keys(scheduleData).length} รายการ`:'ยังไม่ได้สร้างโปรแกรม';renderScheduleManager();});}
+      if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){if(!firebase.apps.length)firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);scheduleRef=firebase.database().ref(SCHEDULE_KEY);scheduleRef.on('value',snap=>{
+        scheduleData=snap.val()||{};
+        document.getElementById('scheduleCloudStatus').textContent=Object.keys(scheduleData).length?`ออนไลน์ · ${Object.keys(scheduleData).length} รายการ`:'ยังไม่ได้สร้างโปรแกรม';
+        // ใช้โปรแกรมจาก Firebase เป็นแหล่งข้อมูลเดียวกับหน้าคนดู เพื่อไม่ให้ Admin/คนดูคนละโปรแกรม
+        if(Object.keys(scheduleData).length){
+          const baseById={};
+          // MATCHES ก่อนหน้านี้อาจมีข้อมูล goals เดิม จึงเก็บไว้แล้วให้ค่าจาก Firebase override เฉพาะข้อมูลโปรแกรม
+          (Array.isArray(MATCHES)?MATCHES:[]).forEach(m=>{baseById[m.id]=m;});
+          MATCHES=Object.values(scheduleData).filter(m=>m && m.id).map(m=>({...baseById[m.id],...m}));
+          MATCHES.sort((a,b)=>{const da={fri:1,sat:2,sun:3}[a.day]||9,db={fri:1,sat:2,sun:3}[b.day]||9;return da-db || String(a.time||'').localeCompare(String(b.time||''));});
+        }
+        renderScheduleManager();
+        render();
+      });}
     }catch(e){console.error(e);}
   }
   document.getElementById('scheduleAddBtn')?.addEventListener('click',()=>openScheduleForm(null));
