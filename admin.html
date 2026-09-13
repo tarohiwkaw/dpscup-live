@@ -14,7 +14,7 @@
 .hero{position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-70px;top:-80px;background:radial-gradient(circle,rgba(23,105,224,.14),transparent 68%);pointer-events:none}.toolbar button{min-height:42px}.match{transition:transform .15s ease,box-shadow .15s ease}.match:focus-within{box-shadow:0 10px 25px rgba(23,105,224,.11);border-color:#b9d2f2}.manual-row .save{min-height:40px}.goal-add button.add{min-height:40px}.report-row{background:#fff}.reports-panel{border-color:#d7e5f5}.reports-panel .reports-head{background:linear-gradient(90deg,#fff,#f5f9ff)}
 @media(max-width:700px){.admin-modebar{align-items:flex-start;flex-direction:column}.admin-grade-tabs{width:100%}.admin-grade-tabs button{flex:1}.admin-nav{grid-template-columns:repeat(2,1fr)}.admin-nav button{min-height:42px}.hero{padding:18px}.title{font-size:38px}.days{margin-top:10px}}
 
-.grade-badge{display:inline-block;margin-bottom:4px;padding:2px 7px;border-radius:999px;font:700 9px/1.2 Prompt,sans-serif;letter-spacing:.1px;border:1px solid #cfe0f5;background:#eef6ff;color:#1769e0;white-space:nowrap}.grade-badge.senior{background:#f3edff;border-color:#dfccff;color:#7b3fe4}.grade-badge.junior{background:#eef6ff;border-color:#cfe0f5;color:#1769e0}.m-time{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px}
+.grade-badge{display:inline-block;margin-bottom:4px;padding:2px 7px;border-radius:999px;font:700 9px/1.2 Prompt,sans-serif;letter-spacing:.1px;border:1px solid #cfe0f5;background:#eef6ff;color:#1769e0;white-space:nowrap}.grade-badge.senior{background:#f3edff;border-color:#dfccff;color:#7b3fe4}.grade-badge.junior{background:#eef6ff;border-color:#cfe0f5;color:#1769e0}.grade-badge.special{background:#fdf1e0;border-color:#f2ddb0;color:#b3760a}.m-time{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px}
 </style>
 <body><div id="adminGate"><div id="adminBox"><h2>🔐 เข้าสู่ระบบผู้ดูแล</h2><div style="color:#7185a3;font-size:12px;line-height:1.6;margin-top:6px">เฉพาะบัญชีแอดมินที่สร้างไว้ใน Firebase เท่านั้น</div><input id="adminEmail" type="email" placeholder="อีเมลแอดมิน" autocomplete="username"><input id="adminPassword" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"><button id="adminEnter">เข้าสู่ระบบ</button><div id="adminErr"></div></div></div><div class="wrap"><header class="hero"><div class="eyebrow">DPSPN · ADMIN SCORE CONTROL</div><h1 class="title">DPSCUP <span class="no">ADMIN</span></h1><div class="eyebrow">สนามฟุตบอล King Power · โรงเรียนพีระยานาวินคลองหินวิทยา</div><div class="view-only">🔐 แอดมินเท่านั้น</div><div class="toolbar"><button class="primary" id="printBtn">🖨️ พิมพ์ / บันทึก PDF</button><button id="logoutBtn">ออกจากระบบ</button></div><div class="next-line" id="nextLine"><span class="dot"></span><span id="nextText">กำลังโหลด…</span></div></header>
 <div class="admin-modebar">
@@ -73,11 +73,13 @@
     {id:"sun-1", day:"sun", group:"ม.ต้น", start:"2026-09-13T08:30:00+07:00", end:"2026-09-13T08:50:00+07:00", time:"08:30", a:"บูเดาะบูล่ะห์", b:"ทีมงาน X อาเซียน"},
     {id:"sun-2", day:"sun", group:"ม.ต้น", start:"2026-09-13T08:50:00+07:00", end:"2026-09-13T09:10:00+07:00", time:"08:50", a:"VORTEX", b:"TSP รุ่นที่ 4 ACADEMY 1"},
     {id:"sun-3", day:"sun", group:"ม.ต้น", start:"2026-09-13T09:10:00+07:00", end:"2026-09-13T09:30:00+07:00", time:"09:10", a:"ลุงโชเล่ X ปูดอง", b:"น้องใหม่ X Q-CHANGE"},
+    {id:"sun-onepiraya", day:"sun", group:"พิเศษ", start:"2026-09-13T16:00:00+07:00", end:"2026-09-13T17:30:00+07:00", time:"16:00", a:"ทีมศิษย์เก่า ONE PIRAYA", b:"ทีมปัจจุบัน DPSPN"},
   ];
 
   // รุ่นการแข่งขัน: ทีม 4 ชุดนี้เป็น ม.ปลายตามรายชื่อที่เหลือจากผัง ม.ต้น
   const SENIOR_MATCH_IDS = new Set(['fri-4','sat-0b','sat-3','sat-6','sat-9','sat-12']);
-  function getMatchGrade(m){ return SENIOR_MATCH_IDS.has(m.id) ? 'ม.ปลาย' : 'ม.ต้น'; }
+  const SPECIAL_MATCH_IDS = new Set(['sun-onepiraya']);
+  function getMatchGrade(m){ if(SPECIAL_MATCH_IDS.has(m.id)) return 'พิเศษ'; return SENIOR_MATCH_IDS.has(m.id) ? 'ม.ปลาย' : 'ม.ต้น'; }
 
   const STORAGE_KEY = "dpscup-2-scores";
   const REPORTS_KEY = "dpscup-2-reports";
@@ -241,7 +243,7 @@
     return `
       <div class="match">
         <div class="m-row">
-          <div class="m-time"><span class="grade-badge ${getMatchGrade(m)==="ม.ปลาย"?"senior":"junior"}">${getMatchGrade(m)}</span>${m.time || ""}</div>
+          <div class="m-time"><span class="grade-badge ${getMatchGrade(m)==="ม.ปลาย"?"senior":(getMatchGrade(m)==="พิเศษ"?"special":"junior")}">${getMatchGrade(m)}</span>${m.time || ""}</div>
           <div class="m-teams">
             <div class="m-names">
               <div class="m-name ${aWin?'win':bWin?'lose':''}">${escapeHtml(m.a)}</div>
