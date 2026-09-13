@@ -1,20 +1,9 @@
 {
   "rules": {
-    "dpscup-2-scores": {
-      ".read": true,
-      ".write": "auth != null"
-    },
-    "dpscup-2-reports": {
-      ".read": "auth != null",
-      ".write": true
-    },
-    "dpscup-2-summary": {
-      ".read": true,
-      ".write": "auth != null"
-    },
-    "dpscup-2-schedule": {
-      ".read": true,
-      ".write": "auth != null"
-    }
+    "dpscup-2-scores": { ".read": true, ".write": "auth != null" },
+    "dpscup-2-reports": { ".read": "auth != null", ".write": true },
+    "dpscup-2-summary": { ".read": true, ".write": "auth != null" },
+    "dpscup-2-schedule": { ".read": true, ".write": "auth != null" },
+    "dpscup-2-analytics": { ".read": "auth != null", ".write": true }
   }
 }
