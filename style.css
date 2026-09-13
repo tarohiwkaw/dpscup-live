@@ -9,3 +9,5 @@
 /* iPad Safari: use text input with native-like visual masking to avoid password-field input bugs */
 #pass{-webkit-text-security:disc;text-security:disc;}
 #pass::placeholder{-webkit-text-security:none;text-security:none;}
+
+.result-extra{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.result-extra select{min-height:40px;border:1px solid #cfe0f4;border-radius:10px;padding:8px;background:#fff;color:#123b78}.result-label{margin:8px auto 0;padding:6px 10px;border-radius:999px;background:#eef5ff;color:#155dcc;font-size:12px;font-weight:700;text-align:center;width:max-content;max-width:90%}@media(max-width:700px){.result-extra{grid-template-columns:1fr}}
