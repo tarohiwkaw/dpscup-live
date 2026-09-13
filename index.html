@@ -219,11 +219,11 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
     {id:"sun-onepiraya", day:"sun", group:"พิเศษ", start:"2026-09-13T16:00:00+07:00", end:"2026-09-13T17:30:00+07:00", time:"16:00", a:"ทีมศิษย์เก่า ONE PIRAYA", b:"ทีมปัจจุบัน DPSPN"},
   ];
 
-  const BASE_MATCHES = JSON.parse(JSON.stringify(MATCHES));
-
   // แยกรุ่นจากโครงสร้างการแข่งขันจริง: ม.ปลายมี 4 ทีม พบกันหมด 6 คู่
   const SENIOR_MATCH_IDS = new Set(['fri-4','sat-0b','sat-3','sat-6','sat-9','sat-12']);
   const SPECIAL_MATCH_IDS = new Set(['sun-onepiraya']);
+  const BASE_MATCHES = MATCHES.map(m => ({...m, goals:Array.isArray(m.goals)?m.goals.map(g=>({...g})):m.goals}));
+
   function getMatchGrade(m){ if(m && m.grade) return m.grade; if(SPECIAL_MATCH_IDS.has(m.id)) return 'พิเศษ'; return SENIOR_MATCH_IDS.has(m.id) ? 'ม.ปลาย' : 'ม.ต้น'; }
 
   const STORAGE_KEY = "dpscup-2-scores";
@@ -238,31 +238,46 @@ a{color:inherit}.top-nav{height:70px;display:flex;align-items:center;justify-con
   async function loadScores(){
     try{
       const SCHEDULE_KEY = 'dpscup-2-schedule';
-  function applyScheduleObject(v){
-    if(!v || !Object.keys(v).length) return false;
-    const arr=Object.values(v).filter(x=>x && x.id);
-    if(!arr.length) return false;
-    // If an older/partial schedule was accidentally saved, do not let the public page
-    // hide the original program. Restore missing base matches locally and keep any
-    // custom schedule rows from Firebase. Admin can then use the Schedule manager
-    // to edit/delete the restored rows normally.
-    if(arr.length < 20){
-      const byId=new Map(BASE_MATCHES.map(m=>[m.id,m]));
-      arr.forEach(m=>byId.set(m.id,{...(byId.get(m.id)||{}),...m}));
-      MATCHES=Array.from(byId.values());
-    }else{
-      MATCHES=arr;
-    }
-    MATCHES.sort((a,b)=>{const d={fri:1,sat:2,sun:3}[a.day]||9,db={fri:1,sat:2,sun:3}[b.day]||9;return d-db || String(a.time||'').localeCompare(String(b.time||''));});
-    return true;
-  }
-  function watchSchedule(){
-    try{ if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){ if(!firebase.apps.length)firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG); firebase.database().ref(SCHEDULE_KEY).on('value',snap=>{ if(applyScheduleObject(snap.val())){ render(); } }); } }catch(e){console.error(e);} 
-  }
-  watchSchedule();
+      function applyScheduleObject(v){
+        const cloud = v && typeof v === 'object' ? v : {};
+        const tombstones = new Set(Object.values(cloud).filter(x=>x && x.deleted && x.id).map(x=>x.id));
+        const byId = {};
+        BASE_MATCHES.forEach(m=>{ if(!tombstones.has(m.id)) byId[m.id]={...m}; });
+        Object.values(cloud).forEach(x=>{
+          if(!x || !x.id || x.deleted) return;
+          byId[x.id] = {...(byId[x.id]||{}), ...x};
+        });
+        let arr=Object.values(byId);
+        // ซ่อนรายการที่ถูกสร้างซ้ำโดยไม่ตั้งใจ (คู่/เวลา/รุ่นเดียวกัน) โดยไม่แตะข้อมูลคะแนน
+        const seen=new Set();
+        arr=arr.filter(m=>{
+          if(m.isBreak) return true;
+          const sig=[m.day||'',m.time||'',m.grade||m.group||'',m.a||'',m.b||''].join('¦');
+          if(seen.has(sig)) return false; seen.add(sig); return true;
+        });
+        arr.sort((a,b)=>{
+          const dayOrder={fri:1,sat:2,sun:3};
+          const da=dayOrder[a.day]||9, db=dayOrder[b.day]||9;
+          return da-db || String(a.time||'').localeCompare(String(b.time||''));
+        });
+        MATCHES=arr;
+        return arr.length>0;
+      }
+      function watchSchedule(db){
+        try{
+          const ref=db.ref(SCHEDULE_KEY);
+          ref.on('value',snap=>{
+            const ok=applyScheduleObject(snap.val());
+            render();
+            updateCloudStatus(ok ? 'ออนไลน์ · โปรแกรมอัปเดตเรียลไทม์' : 'ออนไลน์ · ใช้โปรแกรมมาตรฐาน');
+          },err=>{ console.error(err); MATCHES=BASE_MATCHES.map(m=>({...m})); render(); updateCloudStatus('ออนไลน์ · ใช้โปรแกรมมาตรฐาน'); });
+        }catch(e){ console.error(e); MATCHES=BASE_MATCHES.map(m=>({...m})); render(); }
+      }
   if(window.DPSCUP_FIREBASE_CONFIG && window.firebase){
         if(!firebase.apps.length) firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);
-        dbRef = firebase.database().ref(STORAGE_KEY);
+        const db = firebase.database();
+        watchSchedule(db);
+        dbRef = db.ref(STORAGE_KEY);
         dbRef.on("value", snap => {
           reported = snap.val() || {};
           render();

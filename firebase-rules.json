@@ -10,7 +10,7 @@
     },
     "dpscup-2-reports": {
       ".read": "auth != null",
-      ".write": "auth != null || !data.exists()",
+      ".write": true,
       ".indexOn": [
         "createdAt"
       ]
