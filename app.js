@@ -1,4 +1,10 @@
-(function(){'use strict';const SENIOR_IDS=new Set(['fri-4','sat-0b','sat-3','sat-6','sat-9','sat-12']);const SPECIAL_IDS=new Set(['sun-onepiraya']);const SCORE_KEY='dpscup-2-scores',SCHEDULE_KEY='dpscup-2-schedule',REPORT_KEY='dpscup-2-reports',SUMMARY_KEY='dpscup-2-summary';const DEFAULT_MATCHES=[
+(function(){'use strict';
+  // Initialize Firebase exactly once. firebase-config.js must define window.DPSCUP_FIREBASE_CONFIG.
+  if (window.firebase && window.DPSCUP_FIREBASE_CONFIG && !firebase.apps.length) {
+    firebase.initializeApp(window.DPSCUP_FIREBASE_CONFIG);
+  }
+  window.DPSCUP_FIREBASE_READY = !!(window.firebase && firebase.apps && firebase.apps.length);
+const SENIOR_IDS=new Set(['fri-4','sat-0b','sat-3','sat-6','sat-9','sat-12']);const SPECIAL_IDS=new Set(['sun-onepiraya']);const SCORE_KEY='dpscup-2-scores',SCHEDULE_KEY='dpscup-2-schedule',REPORT_KEY='dpscup-2-reports',SUMMARY_KEY='dpscup-2-summary';const DEFAULT_MATCHES=[
     {id:"fri-1", day:"fri", group:"ม.ต้น", time:"16:30", a:"DARK RAVENS X VORTEX", b:"พ่อลังสั่งลุย X เต่าเพื่อนรัก", final:true,
       goals:[{team:"b", scorer:"กิรติ", og:true}]},
     {id:"fri-2", day:"fri", group:"ม.ต้น", time:"16:50", a:"ลูกชายคนโต X TWO", b:"เสืออ้วน X YIYA KATONG", final:true,

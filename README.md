@@ -1,13 +1,5 @@
-# DPSCUP CLEAN REBUILD
+DPSCUP CLEAN REBUILD v37
 
-อัปโหลด `index.html`, `admin.html`, `summary.html`, `bracket.html`, `style.css`, `app.js`, `dpspn-logo.png` และ `firebase-rules.json` แทนชุดเว็บเดิม
+สำคัญ: ต้องเก็บ firebase-config.js ตัวเดิมของโปรเจกต์ dpscup-live ไว้ใน repo
 
-**อย่าลบ `firebase-config.js` เดิม** ให้เก็บไว้ใน repo เดิม
-
-ข้อมูลกลาง:
-- dpscup-2-schedule = โปรแกรม
-- dpscup-2-scores = คะแนน + ผู้ทำประตู
-- dpscup-2-summary = สรุปผล
-- dpscup-2-reports = รายงาน
-
-Admin และคนดูอ่านข้อมูลจากชุดเดียวกัน โปรแกรมที่เพิ่มใน Admin จะขึ้นคนดูอัตโนมัติ
+แก้บัค Login: app.js จะ initialize Firebase จาก window.DPSCUP_FIREBASE_CONFIG เพียงครั้งเดียว ก่อนเรียก firebase.auth()/database ทำให้หน้า Admin ไม่ขึ้นว่า Firebase App ยังไม่ถูกโหลด และใช้โปรเจกต์ dpscup-live ตัวเดียวกันทุกหน้า
