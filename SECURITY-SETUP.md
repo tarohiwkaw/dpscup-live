@@ -1,4 +1,4 @@
-# DPSCUP v65 — Security Hardening
+# DPSCUP v68 — Security Hardening
 
 เป้าหมาย: ลดความเสี่ยงจากการแก้คะแนน ตาราง สรุปผล และประกาศฝนโดยผู้ที่ไม่ใช่ทีมงาน
 
@@ -25,7 +25,7 @@
 ## 3) App Check (แนะนำมาก)
 Firebase Console → App Check → เลือกเว็บ `DPSCUP Live Web` → ใช้ reCAPTCHA Enterprise หรือ reCAPTCHA v3 → ลงทะเบียนโดเมน GitHub Pages → ทดสอบ metrics ก่อน แล้วเปิด Enforcement สำหรับ Realtime Database
 
-ในโค้ด v65 รองรับ App Check แล้ว: ใส่ `window.DPSCUP_APP_CHECK_SITE_KEY = "คีย์ของเว็บคุณ"` ใน `firebase-config.js` แล้วรีเฟรชเว็บ จากนั้นเปิด Enforcement หลังตรวจ metrics แล้ว
+ในโค้ด v68 รองรับ App Check แล้ว: ใส่ `window.DPSCUP_APP_CHECK_SITE_KEY = "คีย์ของเว็บคุณ"` ใน `firebase-config.js` แล้วรีเฟรชเว็บ จากนั้นเปิด Enforcement หลังตรวจ metrics แล้ว
 
 สำหรับการเปิด App Check ต้องใช้ site key ของคุณเอง จึงไม่ควรฝังคีย์ตัวอย่างของผู้อื่น
 
