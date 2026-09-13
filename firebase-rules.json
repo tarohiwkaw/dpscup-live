@@ -10,7 +10,12 @@
     },
     "dpscup-2-reports": {
       ".read": "auth != null",
-      ".write": true
+      ".write": "auth != null || !data.exists()",
+      ".indexOn": ["createdAt"]
+    },
+    "dpscup-bracket": {
+      ".read": true,
+      ".write": "auth != null"
     }
   }
 }
